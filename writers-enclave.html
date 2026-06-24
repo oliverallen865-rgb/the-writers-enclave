@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Writer's Enclave</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap');
+
+  :root{
+    --bg: #F7F4FB;
+    --surface: #EFE8F7;
+    --surface-raised: #E5DBF2;
+    --line: #D3C3E8;
+    --bone: #2E2350;
+    --bone-dim: #5C4E80;
+    --gold: #6B3FA0;
+    --gold-dim: #9678C2;
+    --wax: #1E8A8A;
+  }
+
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; padding:0; }
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  body{
+    background: var(--bg);
+    color: var(--bone);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(107,63,160,0.06), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(30,138,138,0.05), transparent 60%);
+  }
+
+  .app{
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+  }
+
+  /* ---------- TITLE SCREEN ---------- */
+  .title-screen{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+      radial-gradient(ellipse at top left, rgba(107,63,160,0.10), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(30,138,138,0.08), transparent 55%),
+      var(--bg);
+  }
+  .title-card{
+    text-align: center;
+    max-width: 440px;
+    animation: titleIn 0.5s ease;
+  }
+  @keyframes titleIn{
+    from{ opacity: 0; transform: translateY(8px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+  .title-orn-top{
+    color: var(--gold);
+    font-size: 1.1rem;
+    opacity: 0.7;
+    margin-bottom: 14px;
+  }
+  .title-masthead{
+    font-family: 'Source Serif 4', serif;
+    font-weight: 700;
+    font-size: clamp(2.4rem, 8vw, 3.6rem);
+    line-height: 1.15;
+    margin: 0 0 14px;
+    color: var(--bone);
+  }
+  .title-masthead em{
+    color: var(--gold);
+    font-style: italic;
+  }
+  .title-subline{
+    font-size: 0.82rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--bone-dim);
+    margin-bottom: 34px;
+  }
+  .enter-btn{
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    background: var(--gold);
+    color: #FBF9FE;
+    border: none;
+    padding: 15px 38px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 rgba(46,35,80,0.25), 0 6px 18px rgba(107,63,160,0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  }
+  .enter-btn:hover{
+    background: var(--wax);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 rgba(46,35,80,0.25), 0 10px 22px rgba(30,138,138,0.3);
+  }
+  .enter-btn:active{ transform: translateY(0px); box-shadow: 0 2px 0 rgba(46,35,80,0.25); }
+  .enter-btn:focus-visible{ outline: 2px solid var(--gold-dim); outline-offset: 3px; }
+  .title-powered{
+    font-size: 0.7rem;
+    color: var(--gold-dim);
+    margin-top: 30px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ---------- FLOATING HOME BUTTON ---------- */
+  .home-fab{
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    z-index: 500;
+    transition: transform 0.15s ease;
+    padding: 0;
+  }
+  .home-fab.visible{ display: flex; }
+  .home-fab:hover{ transform: scale(1.12); }
+  .home-fab:active{ transform: scale(0.94); }
+  .home-fab:focus-visible{ outline: 2px solid #FFD400; outline-offset: 3px; }
+  .house-icon{ position: relative; width: 22px; height: 18px; }
+  .house-icon .roof{
+    position: absolute; top: -9px; left: 0;
+    width: 0; height: 0;
+    border-left: 11px solid transparent;
+    border-right: 11px solid transparent;
+    border-bottom: 9px solid #E0263F;
+  }
+  .house-icon .wall{
+    position: absolute; top: 0; left: 2px;
+    width: 18px; height: 18px;
+    background: #111; border-radius: 0 0 2px 2px;
+  }
+  .house-icon .door{
+    position: absolute; bottom: 0; left: 9px;
+    width: 6px; height: 9px;
+    background: #FFD400; border-radius: 1.5px 1.5px 0 0;
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    text-align: center;
+    padding: 18px 0 30px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 28px;
+  }
+  .masthead{
+    font-family: 'Source Serif 4', serif;
+    font-weight: 700;
+    font-size: clamp(2.1rem, 5vw, 3.2rem);
+    letter-spacing: 0.5px;
+    margin: 0;
+    color: var(--bone);
+  }
+  .masthead em{ color: var(--gold); font-style: italic; }
+  .subline{ font-size: 0.78rem; letter-spacing: 2.5px; text-transform: uppercase; color: var(--bone-dim); margin-top: 10px; }
+  .powered-by{ font-size: 0.7rem; color: var(--gold-dim); margin-top: 6px; letter-spacing: 0.5px; }
+  .rule-orn{ width: 60px; height: 1px; background: var(--gold); margin: 14px auto 0; opacity: 0.6; }
+
+  /* ---------- LAYOUT ---------- */
+  .layout{
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 26px;
+  }
+  @media (max-width: 760px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+
+  /* ---------- TYPEWRITER KEY NAV ---------- */
+  nav.keys{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: sticky;
+    top: 20px;
+    align-self: start;
+  }
+  @media (max-width: 760px){
+    nav.keys{ position: static; flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  }
+  .key{
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--bone-dim);
+    padding: 11px 14px;
+    border-radius: 7px;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 2px 0 rgba(46,35,80,0.15);
+    transition: transform 0.12s ease, color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  }
+  .key:nth-child(odd){ transform: rotate(-0.4deg); }
+  .key:nth-child(even){ transform: rotate(0.4deg); }
+  .key:hover{ color: var(--bone); border-color: var(--gold-dim); }
+  .key:focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+  .key.active{
+    background: var(--gold);
+    color: #F7F4FB;
+    border-color: var(--gold);
+    transform: rotate(0deg) translateY(-1px);
+    box-shadow: 0 3px 0 rgba(46,35,80,0.25);
+  }
+
+  /* ---------- MAIN PAGE ---------- */
+  main{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 30px 32px;
+    min-height: 420px;
+  }
+  @media (max-width: 480px){ main{ padding: 22px 18px; } }
+
+  .page-title{
+    font-family: 'Source Serif 4', serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--bone);
+  }
+  .page-kicker{
+    font-size: 0.74rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 18px;
+    display: block;
+  }
+  section{ display: none; }
+  section.active{ display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn{ from{ opacity:0; transform: translateY(4px);} to{opacity:1; transform: translateY(0);} }
+
+  h3.group-head{
+    font-family: 'Source Serif 4', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
+    margin: 26px 0 14px;
+  }
+  section > h3.group-head:first-of-type{ margin-top: 6px; }
+
+  /* ---------- CARD GRID ---------- */
+  .grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 14px;
+  }
+  .card{
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 17px;
+  }
+  .card h4{ font-family: 'Source Serif 4', serif; font-size: 1.02rem; margin: 0 0 6px; color: var(--bone); }
+  .card .tag{
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(107,63,160,0.08);
+    border: 1px solid rgba(107,63,160,0.3);
+    border-radius: 4px;
+    padding: 2px 7px;
+    margin-bottom: 8px;
+  }
+  .card p{ font-size: 0.87rem; line-height: 1.5; color: var(--bone-dim); margin: 0 0 8px; }
+  .card .example{
+    font-style: italic;
+    color: var(--bone);
+    font-size: 0.85rem;
+    border-left: 2px solid var(--wax);
+    padding-left: 10px;
+    margin-top: 8px;
+  }
+
+  /* ---------- SCRIPT FORMAT BLOCKS ---------- */
+  .script-block{
+    background: #2E2350;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .script-block .format-label{
+    font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #5FC9C9; margin-bottom: 8px; display: block;
+  }
+  .script-block pre{
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.84rem; line-height: 1.6;
+    color: #F0EAFA; margin: 0 0 10px; white-space: pre-wrap;
+  }
+  .script-block .note{ font-size: 0.82rem; color: #C2B6E0; line-height: 1.5; }
+
+  /* ---------- THE DOJO ---------- */
+  .dojo{
+    background: var(--surface);
+    border: 1.5px dashed var(--gold-dim);
+    border-radius: 10px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+  }
+  @media (max-width: 480px){ .dojo{ padding: 18px 18px; } }
+  .dojo-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 4px;
+  }
+  .dojo-kicker{ font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--wax); display: block; margin-bottom: 2px; }
+  .dojo-title{ font-family: 'Source Serif 4', serif; font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--bone); }
+  .dojo-streak{
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--surface-raised); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 14px; min-width: 58px;
+  }
+  .streak-count{ font-family: 'Source Serif 4', serif; font-weight: 700; font-size: 1.4rem; color: var(--wax); line-height: 1; }
+  .streak-label{ font-size: 0.6rem; letter-spacing: 0.5px; text-transform: uppercase; color: var(--bone-dim); text-align: center; line-height: 1.2; margin-top: 3px; }
+  .dojo-intro{ font-size: 0.88rem; color: var(--bone-dim); line-height: 1.5; margin: 10px 0 16px; }
+  .dojo-menu{ display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+  .dojo-chip{
+    font-family: 'Inter', sans-serif; font-size: 0.76rem; font-weight: 500;
+    background: var(--surface-raised); border: 1px solid var(--line);
+    color: var(--bone-dim); padding: 6px 12px; border-radius: 999px; cursor: pointer;
+    transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  }
+  .dojo-chip:hover{ color: var(--bone); border-color: var(--gold-dim); }
+  .dojo-chip.active{ background: var(--gold); color: #FBF9FE; border-color: var(--gold); }
+  .dojo-prompt-box{
+    background: var(--surface-raised);
+    border-left: 3px solid var(--wax);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .dojo-prompt-tag{ font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 5px; }
+  .dojo-prompt-title{ font-family: 'Source Serif 4', serif; font-size: 1.08rem; color: var(--bone); margin: 0 0 5px; }
+  .dojo-prompt-text{ font-size: 0.88rem; color: var(--bone-dim); line-height: 1.5; margin: 0; }
+  .dojo-textarea{
+    width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    color: var(--bone); font-family: 'Source Serif 4', serif; font-size: 0.95rem; line-height: 1.6;
+    padding: 14px 16px; resize: vertical; margin-bottom: 14px;
+  }
+  .dojo-textarea::placeholder{ color: var(--bone-dim); opacity: 0.6; }
+  .dojo-textarea:focus-visible{ outline: 2px solid var(--gold-dim); outline-offset: 1px; }
+  .dojo-actions{ display: flex; gap: 10px; flex-wrap: wrap; }
+  .dojo-btn{
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.85rem;
+    padding: 10px 18px; border-radius: 7px; cursor: pointer; border: 1px solid transparent;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+  }
+  .dojo-btn:active{ transform: scale(0.97); }
+  .dojo-btn-primary{ background: var(--wax); color: #FBF9FE; }
+  .dojo-btn-primary:hover{ opacity: 0.9; }
+  .dojo-btn-secondary{ background: transparent; border-color: var(--line); color: var(--bone-dim); }
+  .dojo-btn-secondary:hover{ color: var(--bone); border-color: var(--gold-dim); }
+  .dojo-feedback{
+    margin-top: 14px; font-size: 0.88rem; line-height: 1.6; color: var(--bone); min-height: 1.2em;
+  }
+  .dojo-feedback:not(:empty){
+    background: var(--surface-raised); border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0; padding: 13px 16px;
+  }
+  .dojo-feedback .fb-stamp{
+    display: block; font-size: 0.66rem; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--wax); margin-bottom: 6px;
+  }
+
+  /* ---------- POET'S CHALLENGE ---------- */
+  .challenge{
+    background: var(--surface);
+    border: 1.5px solid var(--wax);
+    border-radius: 10px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+  }
+  @media (max-width: 480px){ .challenge{ padding: 18px 18px; } }
+  .challenge-kicker{ color: var(--gold) !important; }
+  .challenge-score-box{ border-color: var(--wax); background: rgba(30,138,138,0.08); }
+  .challenge-score{ color: var(--wax) !important; }
+  .challenge-prompt-box{ border-left-color: var(--gold); }
+  .form-card-row{ display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .form-card{
+    background: var(--surface-raised); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; cursor: pointer; text-align: left;
+    transition: border-color 0.12s ease, transform 0.12s ease;
+  }
+  .form-card:hover{ border-color: var(--gold-dim); }
+  .form-card.active{ border-color: var(--wax); background: rgba(30,138,138,0.1); }
+  .form-card .fc-name{ font-family: 'Source Serif 4', serif; font-weight: 700; font-size: 0.95rem; color: var(--bone); display: block; }
+  .form-card .fc-desc{ font-size: 0.72rem; color: var(--bone-dim); margin-top: 2px; display: block; }
+  .challenge-submit-btn{ background: var(--wax); }
+  .challenge-result{ margin-top: 14px; }
+  .challenge-result:empty{ display: none; }
+  .score-banner{ display: flex; align-items: center; gap: 16px; background: var(--surface-raised); border-radius: 8px; padding: 16px 18px; margin-bottom: 12px; }
+  .score-total-wrap{ display: flex; flex-direction: column; align-items: center; min-width: 64px; }
+  .score-total{ font-family: 'Source Serif 4', serif; font-weight: 700; font-size: 2rem; color: var(--wax); line-height: 1; }
+  .score-max{ font-size: 0.7rem; color: var(--bone-dim); }
+  .score-rank{ font-family: 'Source Serif 4', serif; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+  .score-rank-sub{ font-size: 0.78rem; color: var(--bone-dim); margin-top: 2px; }
+  .score-criteria{ display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .criterion-row{ display: flex; flex-direction: column; gap: 4px; }
+  .criterion-head{ display: flex; justify-content: space-between; font-size: 0.82rem; }
+  .criterion-name{ color: var(--bone); font-weight: 600; }
+  .criterion-pts{ color: var(--wax); font-weight: 600; }
+  .criterion-bar-track{ width: 100%; height: 6px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .criterion-bar-fill{ height: 100%; background: var(--gold); border-radius: 4px; }
+  .criterion-note{ font-size: 0.78rem; color: var(--bone-dim); line-height: 1.45; }
+  .score-closing{
+    font-size: 0.86rem; line-height: 1.55; color: var(--bone);
+    background: var(--surface-raised); border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0; padding: 12px 16px;
+  }
+
+  /* ---------- THE WRITER'S CIRCLE ---------- */
+  .circle{
+    background: var(--surface);
+    border: 1.5px solid var(--gold);
+    border-radius: 10px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+  }
+  @media (max-width: 480px){ .circle{ padding: 18px 18px; } }
+  .circle-kicker{ color: var(--wax) !important; }
+  .circle-localnote{
+    font-size: 0.78rem; color: var(--bone-dim);
+    background: var(--surface-raised); border: 1px dashed var(--line);
+    border-radius: 7px; padding: 9px 12px; margin: 10px 0 18px; line-height: 1.5;
+  }
+  .circle-field{ margin-bottom: 14px; }
+  .circle-label{ display: block; font-size: 0.76rem; letter-spacing: 0.5px; text-transform: uppercase; color: var(--bone-dim); margin-bottom: 6px; }
+  .circle-input, .circle-role-select{
+    width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 7px;
+    color: var(--bone); font-family: 'Inter', sans-serif; font-size: 0.9rem; padding: 10px 12px;
+  }
+  .circle-input:focus-visible, .circle-role-select:focus-visible{ outline: 2px solid var(--gold-dim); outline-offset: 1px; }
+  .circle-delegate-count{ display: flex; gap: 8px; }
+  .count-chip{
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.88rem;
+    background: var(--surface-raised); border: 1px solid var(--line); color: var(--bone-dim);
+    width: 42px; height: 38px; border-radius: 7px; cursor: pointer;
+  }
+  .count-chip.active{ background: var(--gold); color: #FBF9FE; border-color: var(--gold); }
+  .circle-create-btn{ background: var(--gold); margin-top: 6px; }
+  .circle-room-header{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+  .circle-room-code-label{ display: block; font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--bone-dim); }
+  .circle-room-code{ font-family: 'Courier Prime', monospace; font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+  .circle-invite-note{ font-size: 0.8rem; color: var(--bone-dim); background: var(--surface-raised); border-radius: 7px; padding: 9px 12px; margin-bottom: 16px; line-height: 1.5; }
+  .circle-invite-note strong{ color: var(--bone); font-family: 'Courier Prime', monospace; }
+  .circle-story-title{ font-family: 'Source Serif 4', serif; font-size: 1.25rem; color: var(--bone); margin: 0 0 14px; }
+  .circle-role-row{ display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .circle-role-row .circle-label{ margin-bottom: 0; }
+  .circle-role-select{ width: auto; flex: 1; min-width: 160px; }
+  .circle-page{
+    background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 18px 20px; min-height: 140px; max-height: 340px; overflow-y: auto;
+    margin-bottom: 10px; font-family: 'Source Serif 4', serif; font-size: 0.96rem; line-height: 1.7; color: var(--bone);
+  }
+  .circle-page-empty{ color: var(--bone-dim); font-style: italic; font-family: 'Inter', sans-serif; font-size: 0.86rem; margin: 0; }
+  .circle-sentence .sent-author{
+    font-family: 'Inter', sans-serif; font-size: 0.62rem; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase; vertical-align: super; margin-right: 2px; opacity: 0.85;
+  }
+  .author-lead{ color: var(--wax); }
+  .author-d1{ color: var(--gold); }
+  .author-d2{ color: #5B8DEF; }
+  .author-d3{ color: #4FB06B; }
+  .author-d4{ color: #C06BC4; }
+  .circle-meter-row{ display: flex; gap: 16px; font-size: 0.76rem; color: var(--bone-dim); margin-bottom: 12px; flex-wrap: wrap; }
+  .circle-turn-hint{ font-size: 0.8rem; color: var(--gold-dim); margin-bottom: 8px; min-height: 1.1em; }
+  .circle-textarea{ margin-bottom: 10px; }
+  .circle-mode-toggle{ display: flex; gap: 8px; margin-bottom: 18px; }
+  .mode-tab{
+    flex: 1; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.82rem;
+    background: var(--surface-raised); border: 1px solid var(--line); color: var(--bone-dim);
+    padding: 9px 12px; border-radius: 7px; cursor: pointer;
+  }
+  .mode-tab.active{ background: var(--gold); color: #FBF9FE; border-color: var(--gold); }
+  .circle-setup-error, .circle-error{
+    font-size: 0.82rem; color: #8B3A3A; background: rgba(139,58,58,0.1);
+    border: 1px solid rgba(139,58,58,0.3); border-radius: 7px; padding: 9px 12px; margin: 10px 0; line-height: 1.5;
+  }
+  .circle-setup-error:empty, .circle-error:empty{ display: none; margin: 0; padding: 0; border: none; }
+  .circle-status-dot{ display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--bone-dim); margin-left: 5px; vertical-align: middle; }
+  .circle-status-dot.live{ background: #1E8A6A; }
+  .circle-room-header-actions{ display: flex; gap: 8px; }
+  .join-role-btn{
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+    background: var(--surface-raised); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 14px; margin-bottom: 8px; cursor: pointer; font-family: 'Inter', sans-serif;
+    font-size: 0.88rem; color: var(--bone);
+  }
+  .join-role-btn:hover{ border-color: var(--gold-dim); }
+  .join-role-tag{ font-size: 0.65rem; font-weight: 700; padding: 3px 7px; border-radius: 4px; }
+
+  /* ---------- QUOTE BLOCK ---------- */
+  .letterpress{
+    position: relative;
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+  }
+  .letterpress::before{
+    content: "\201C";
+    font-family: 'Source Serif 4', serif;
+    font-size: 3.2rem;
+    color: var(--gold); opacity: 0.35;
+    position: absolute; top: -6px; left: 14px; line-height: 1;
+  }
+  .letterpress blockquote{
+    font-family: 'Source Serif 4', serif; font-style: italic;
+    font-size: 1.15rem; line-height: 1.5; color: var(--bone); margin: 0 0 10px; padding-left: 28px;
+  }
+  .letterpress cite{ font-style: normal; font-size: 0.8rem; letter-spacing: 0.5px; color: var(--gold-dim); padding-left: 28px; }
+  .quote-btn{
+    background: none; border: 1px solid var(--line); color: var(--bone-dim);
+    font-size: 0.72rem; letter-spacing: 1px; text-transform: uppercase;
+    padding: 7px 12px; border-radius: 6px; cursor: pointer; margin-top: 4px;
+  }
+  .quote-btn:hover{ color: var(--gold); border-color: var(--gold-dim); }
+
+  /* ---------- LISTS ---------- */
+  ul.tip-list{ list-style: none; margin: 0; padding: 0; }
+  ul.tip-list li{ padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; line-height: 1.55; color: var(--bone-dim); }
+  ul.tip-list li:last-child{ border-bottom: none; }
+  ul.tip-list li strong{ color: var(--bone); font-weight: 600; }
+  .resource-row{ display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .resource-row:last-child{ border-bottom: none; }
+  .resource-row .rname{ color: var(--bone); font-weight: 600; font-size: 0.92rem; }
+  .resource-row .rdesc{ color: var(--bone-dim); font-size: 0.84rem; }
+
+  /* ---------- THE LIBRARY ---------- */
+  .library-hero{
+    background: linear-gradient(135deg, #2E2350 0%, #1a1535 100%);
+    border-radius: 10px;
+    padding: 28px 28px 24px;
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .library-hero::before{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at top right, rgba(107,63,160,0.35), transparent 60%),
+      radial-gradient(ellipse at bottom left, rgba(30,138,138,0.2), transparent 60%);
+    pointer-events: none;
+  }
+  .library-hero-inner{ position: relative; z-index: 1; }
+  .library-lamp{
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+  .library-hero-title{
+    font-family: 'Source Serif 4', serif;
+    font-weight: 700;
+    font-size: 1.55rem;
+    color: #F0EAFA;
+    margin: 0 0 8px;
+  }
+  .library-hero-sub{
+    font-size: 0.87rem;
+    color: #C2B6E0;
+    line-height: 1.55;
+    margin: 0 0 20px;
+    max-width: 560px;
+  }
+  .library-cta-row{ display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .library-cta-btn{
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 11px 22px;
+    border-radius: 7px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .library-cta-btn:hover{ opacity: 0.88; transform: translateY(-1px); }
+  .library-cta-btn-primary{ background: var(--gold); color: #FBF9FE; }
+  .library-cta-btn-secondary{ background: rgba(255,255,255,0.12); color: #F0EAFA; border: 1px solid rgba(255,255,255,0.2); }
+  .library-cta-note{ font-size: 0.72rem; color: #9678C2; margin-top: 10px; }
+
+  /* Reading Journal */
+  .reading-journal{
+    background: var(--surface);
+    border: 1.5px solid var(--gold);
+    border-radius: 10px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+  }
+  @media (max-width: 480px){ .reading-journal{ padding: 18px 18px; } }
+  .journal-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .journal-kicker{ font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 2px; }
+  .journal-title{ font-family: 'Source Serif 4', serif; font-size: 1.4rem; font-weight: 700; margin: 0; color: var(--bone); }
+  .journal-book-count{
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--surface-raised); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 14px; min-width: 58px;
+  }
+  .journal-count-num{ font-family: 'Source Serif 4', serif; font-weight: 700; font-size: 1.4rem; color: var(--gold); line-height: 1; }
+  .journal-count-label{ font-size: 0.6rem; letter-spacing: 0.5px; text-transform: uppercase; color: var(--bone-dim); text-align: center; line-height: 1.2; margin-top: 3px; }
+  .journal-intro{ font-size: 0.88rem; color: var(--bone-dim); line-height: 1.5; margin: 0 0 18px; }
+
+  .journal-add-row{
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+    margin-bottom: 14px;
+    align-items: end;
+  }
+  @media (max-width: 600px){ .journal-add-row{ grid-template-columns: 1fr; } }
+  .journal-field label{ display: block; font-size: 0.72rem; letter-spacing: 0.5px; text-transform: uppercase; color: var(--bone-dim); margin-bottom: 5px; }
+  .journal-input{
+    width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 7px;
+    color: var(--bone); font-family: 'Inter', sans-serif; font-size: 0.88rem; padding: 9px 12px;
+  }
+  .journal-input:focus-visible{ outline: 2px solid var(--gold-dim); outline-offset: 1px; }
+  .journal-add-btn{
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.82rem;
+    background: var(--gold); color: #FBF9FE; border: none; padding: 10px 16px;
+    border-radius: 7px; cursor: pointer; white-space: nowrap;
+    transition: opacity 0.1s ease;
+  }
+  .journal-add-btn:hover{ opacity: 0.88; }
+
+  .journal-entries{ display: flex; flex-direction: column; gap: 10px; }
+  .journal-entry{
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .journal-entry-header{ display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .journal-entry-title{ font-family: 'Source Serif 4', serif; font-size: 1rem; font-weight: 700; color: var(--bone); margin: 0; }
+  .journal-entry-author{ font-size: 0.78rem; color: var(--bone-dim); margin-top: 1px; }
+  .journal-entry-meta{ display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+  .journal-status{
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px;
+  }
+  .status-reading{ background: rgba(30,138,138,0.15); color: var(--wax); border: 1px solid rgba(30,138,138,0.3); }
+  .status-finished{ background: rgba(107,63,160,0.1); color: var(--gold); border: 1px solid rgba(107,63,160,0.25); }
+  .status-queue{ background: rgba(46,35,80,0.07); color: var(--bone-dim); border: 1px solid var(--line); }
+  .journal-delete-btn{ background: none; border: none; color: var(--bone-dim); cursor: pointer; font-size: 0.8rem; padding: 2px 4px; opacity: 0.5; }
+  .journal-delete-btn:hover{ opacity: 1; color: #8B3A3A; }
+  .journal-notes-area{
+    width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+    color: var(--bone); font-family: 'Source Serif 4', serif; font-size: 0.88rem; line-height: 1.55;
+    padding: 10px 12px; resize: vertical; margin-top: 8px;
+  }
+  .journal-notes-area::placeholder{ color: var(--bone-dim); opacity: 0.5; }
+  .journal-notes-area:focus-visible{ outline: 2px solid var(--gold-dim); outline-offset: 1px; }
+  .journal-status-toggle{ display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .status-chip{
+    font-size: 0.7rem; font-weight: 600; padding: 4px 9px; border-radius: 999px; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--line); color: var(--bone-dim);
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .status-chip.active-reading{ background: rgba(30,138,138,0.15); color: var(--wax); border-color: rgba(30,138,138,0.4); }
+  .status-chip.active-finished{ background: rgba(107,63,160,0.12); color: var(--gold); border-color: rgba(107,63,160,0.3); }
+  .status-chip.active-queue{ background: rgba(46,35,80,0.08); color: var(--bone-dim); border-color: var(--line); }
+  .journal-empty{
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--bone-dim);
+    font-size: 0.88rem;
+    font-style: italic;
+    font-family: 'Source Serif 4', serif;
+  }
+
+  /* Gutenberg Search */
+  .guten-search-box{
+    background: var(--surface);
+    border: 1.5px dashed var(--wax);
+    border-radius: 10px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+  }
+  .guten-search-box h3{
+    font-family: 'Source Serif 4', serif;
+    font-size: 1.2rem; font-weight: 700; margin: 0 0 4px; color: var(--bone);
+  }
+  .guten-search-sub{ font-size: 0.83rem; color: var(--bone-dim); margin: 0 0 16px; line-height: 1.5; }
+  .guten-search-row{ display: flex; gap: 8px; margin-bottom: 14px; }
+  .guten-search-input{
+    flex: 1; background: var(--bg); border: 1px solid var(--line); border-radius: 7px;
+    color: var(--bone); font-family: 'Inter', sans-serif; font-size: 0.9rem; padding: 10px 14px;
+  }
+  .guten-search-input:focus-visible{ outline: 2px solid var(--gold-dim); outline-offset: 1px; }
+  .guten-search-btn{
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.85rem;
+    background: var(--wax); color: #FBF9FE; border: none;
+    padding: 10px 18px; border-radius: 7px; cursor: pointer;
+    transition: opacity 0.1s ease;
+  }
+  .guten-search-btn:hover{ opacity: 0.88; }
+  .guten-results{ display: flex; flex-direction: column; gap: 10px; }
+  .guten-result-card{
+    background: var(--surface-raised); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;
+  }
+  .guten-result-info .gr-title{
+    font-family: 'Source Serif 4', serif; font-size: 1rem; font-weight: 700; color: var(--bone); margin: 0 0 3px;
+  }
+  .guten-result-info .gr-author{ font-size: 0.8rem; color: var(--bone-dim); margin-bottom: 5px; }
+  .guten-result-info .gr-subjects{ font-size: 0.72rem; color: var(--gold-dim); }
+  .guten-result-actions{ display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; align-items: flex-start; }
+  .guten-link-btn{
+    font-size: 0.75rem; font-weight: 600; padding: 6px 11px; border-radius: 6px;
+    text-decoration: none; border: 1px solid transparent; cursor: pointer; display: inline-block;
+    transition: opacity 0.1s ease;
+  }
+  .guten-link-btn:hover{ opacity: 0.82; }
+  .guten-btn-read{ background: var(--gold); color: #FBF9FE; }
+  .guten-btn-add{ background: transparent; border-color: var(--line); color: var(--bone-dim); }
+  .guten-btn-add:hover{ border-color: var(--gold-dim); color: var(--bone); }
+  .guten-status{ font-size: 0.82rem; color: var(--bone-dim); padding: 10px 0; }
+  .guten-status.loading{ color: var(--gold-dim); }
+  .guten-status.error{ color: #8B3A3A; }
+
+  /* Night mode atmosphere strip */
+  .library-time-strip{
+    display: flex; gap: 14px; align-items: center;
+    background: #2E2350; border-radius: 8px;
+    padding: 12px 16px; margin-bottom: 18px;
+    border: 1px solid rgba(107,63,160,0.3);
+  }
+  .time-strip-icon{ font-size: 1.3rem; }
+  .time-strip-text{ font-size: 0.83rem; color: #C2B6E0; line-height: 1.45; }
+  .time-strip-text strong{ color: #F0EAFA; }
+
+  /* Curated shelves */
+  .shelf-row{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .shelf-book{
+    background: var(--surface-raised); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 15px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .shelf-book .sb-title{ font-family: 'Source Serif 4', serif; font-size: 0.94rem; font-weight: 700; color: var(--bone); line-height: 1.3; }
+  .shelf-book .sb-author{ font-size: 0.76rem; color: var(--bone-dim); }
+  .shelf-book .sb-note{ font-size: 0.73rem; color: var(--gold-dim); font-style: italic; line-height: 1.4; }
+  .shelf-book-actions{ display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+  .shelf-book-btn{
+    font-size: 0.72rem; font-weight: 600; padding: 5px 10px; border-radius: 5px;
+    text-decoration: none; border: 1px solid transparent; cursor: pointer; display: inline-block;
+    transition: opacity 0.1s ease;
+  }
+  .shelf-book-btn:hover{ opacity: 0.82; }
+  .sb-btn-read{ background: var(--wax); color: #FBF9FE; }
+  .sb-btn-add{ background: transparent; border-color: var(--line); color: var(--bone-dim); }
+  .sb-btn-add:hover{ border-color: var(--gold-dim); color: var(--bone); }
+
+  footer{ text-align: center; margin-top: 30px; font-size: 0.72rem; color: var(--bone-dim); letter-spacing: 0.5px; opacity: 0.7; }
+
+  /* ---------- LIBRARY MOBILE / TABLET ---------- */
+
+  /* Tablet (≤ 840px): shelf goes 2-col, hero tightens */
+  @media (max-width: 840px){
+    .shelf-row{
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .library-hero{
+      padding: 22px 20px 20px;
+    }
+    .library-hero-title{
+      font-size: 1.35rem;
+    }
+    .guten-search-box{
+      padding: 18px 20px;
+    }
+    .reading-journal{
+      padding: 18px 20px;
+    }
+  }
+
+  /* Mobile (≤ 560px): single column everything, stacked layouts */
+  @media (max-width: 560px){
+
+    /* Hero block */
+    .library-hero{
+      padding: 18px 16px 18px;
+      border-radius: 8px;
+    }
+    .library-hero-title{
+      font-size: 1.2rem;
+    }
+    .library-hero-sub{
+      font-size: 0.82rem;
+      margin-bottom: 16px;
+    }
+    .library-cta-row{
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .library-cta-btn{
+      justify-content: center;
+      padding: 12px 16px;
+    }
+
+    /* Time strip */
+    .library-time-strip{
+      gap: 10px;
+      padding: 10px 14px;
+      align-items: flex-start;
+    }
+    .time-strip-icon{
+      font-size: 1.1rem;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+    .time-strip-text{
+      font-size: 0.8rem;
+    }
+
+    /* Search box */
+    .guten-search-box{
+      padding: 16px 14px;
+      border-radius: 8px;
+    }
+    .guten-search-row{
+      flex-direction: column;
+      gap: 8px;
+    }
+    .guten-search-btn{
+      width: 100%;
+      padding: 11px 16px;
+    }
+
+    /* Search results — stack info above actions */
+    .guten-result-card{
+      flex-direction: column;
+      gap: 10px;
+    }
+    .guten-result-actions{
+      flex-direction: row;
+      flex-wrap: nowrap;
+      width: 100%;
+    }
+    .guten-link-btn{
+      flex: 1;
+      text-align: center;
+      padding: 8px 10px;
+    }
+
+    /* Shelves — single column on phone */
+    .shelf-row{
+      grid-template-columns: 1fr;
+    }
+    .shelf-book{
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 12px 14px;
+    }
+    .shelf-book .sb-title{
+      width: 100%;
+      font-size: 0.9rem;
+    }
+    .shelf-book .sb-author{
+      width: 100%;
+    }
+    .shelf-book .sb-note{
+      width: 100%;
+      margin-bottom: 4px;
+    }
+    .shelf-book-actions{
+      width: 100%;
+      margin-top: 0;
+    }
+    .shelf-book-btn{
+      flex: 1;
+      text-align: center;
+      padding: 7px 10px;
+    }
+
+    /* Journal */
+    .reading-journal{
+      padding: 16px 14px;
+      border-radius: 8px;
+    }
+    .journal-header{
+      gap: 10px;
+    }
+    .journal-title{
+      font-size: 1.2rem;
+    }
+    .journal-add-row{
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .journal-add-btn{
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+    }
+    .journal-entry-header{
+      flex-direction: column;
+      gap: 6px;
+    }
+    .journal-entry-meta{
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .journal-status-toggle{
+      gap: 5px;
+    }
+    .status-chip{
+      font-size: 0.68rem;
+      padding: 5px 10px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="title-screen" id="titleScreen">
+  <div class="title-card">
+    <div class="title-orn-top">✦</div>
+    <h1 class="title-masthead">The Writer's<br><em>Enclave</em></h1>
+    <div class="title-subline">A Desk Reference for Journalists, Writers &amp; Poets</div>
+    <button class="enter-btn" id="enterBtn">Enter Enclave</button>
+    <div class="title-powered">Created &amp; powered by CreativeLabs Inc. &amp; OA Solutions</div>
+  </div>
+</div>
+
+<button class="home-fab" id="homeFab" title="Back to title page" aria-label="Back to title page">
+  <span class="house-icon">
+    <span class="roof"></span>
+    <span class="wall"></span>
+    <span class="door"></span>
+  </span>
+</button>
+
+<div class="app" id="mainApp" hidden>
+  <header>
+    <h1 class="masthead">The Writer's <em>Enclave</em></h1>
+    <div class="subline">A Desk Reference for Journalists, Writers &amp; Poets</div>
+    <div class="rule-orn"></div>
+    <div class="powered-by">Created &amp; powered by CreativeLabs Inc. &amp; OA Solutions</div>
+  </header>
+
+  <div class="letterpress" id="quoteBlock">
+    <blockquote id="quoteText">There is no agony like bearing an untold story inside you.</blockquote>
+    <cite id="quoteCite">— Maya Angelou</cite>
+    <div><button class="quote-btn" onclick="newQuote()">Another quote →</button></div>
+  </div>
+
+  <div class="dojo" id="dojo">
+    <div class="dojo-header">
+      <div>
+        <span class="dojo-kicker">Practice Mat</span>
+        <h2 class="dojo-title">The Dojo</h2>
+      </div>
+      <div class="dojo-streak">
+        <span class="streak-count" id="streakCount">0</span>
+        <span class="streak-label">session<br>streak</span>
+      </div>
+    </div>
+    <p class="dojo-intro">Daily practice for writers. Pick an exercise, write a few lines, and call it done — this is a mat to warm up on, not a test to pass.</p>
+    <div class="dojo-menu" id="dojoMenu"></div>
+    <div class="dojo-prompt-box">
+      <span class="dojo-prompt-tag" id="dojoTag">Today's Exercise</span>
+      <h3 class="dojo-prompt-title" id="dojoExerciseTitle">Daily Word</h3>
+      <p class="dojo-prompt-text" id="dojoExerciseText">Use today's word in a sentence.</p>
+    </div>
+    <textarea class="dojo-textarea" id="dojoTextarea" placeholder="Write here..." rows="4"></textarea>
+    <div class="dojo-actions">
+      <button class="dojo-btn dojo-btn-secondary" id="dojoShuffle">New exercise →</button>
+      <button class="dojo-btn dojo-btn-primary" id="dojoComplete">Mark complete</button>
+    </div>
+    <div class="dojo-feedback" id="dojoFeedback"></div>
+  </div>
+
+  <div class="challenge" id="challenge">
+    <div class="dojo-header">
+      <div>
+        <span class="dojo-kicker challenge-kicker">The Poet's Dojo</span>
+        <h2 class="dojo-title">The Poet's Challenge</h2>
+      </div>
+      <div class="dojo-streak challenge-score-box">
+        <span class="streak-count challenge-score" id="challengeHighScore">0</span>
+        <span class="streak-label">high<br>score</span>
+      </div>
+    </div>
+    <p class="dojo-intro">Write the perfect haiku, elegy, or ballad. Pick your form, write for real, and get a scored breakdown — not a pass/fail, a craft read.</p>
+    <div class="dojo-menu" id="challengeFormMenu"></div>
+    <div class="dojo-prompt-box challenge-prompt-box">
+      <span class="dojo-prompt-tag" id="challengeTag">Form</span>
+      <h3 class="dojo-prompt-title" id="challengeTitle">Haiku</h3>
+      <p class="dojo-prompt-text" id="challengeText">Three lines. 5-7-5. One image, one turn.</p>
+    </div>
+    <textarea class="dojo-textarea" id="challengeTextarea" placeholder="Write your attempt..." rows="5"></textarea>
+    <div class="dojo-actions">
+      <button class="dojo-btn dojo-btn-secondary" id="challengeClear">Clear</button>
+      <button class="dojo-btn dojo-btn-primary challenge-submit-btn" id="challengeSubmit">Score my poem</button>
+    </div>
+    <div class="challenge-result" id="challengeResult"></div>
+  </div>
+
+  <div class="circle" id="circle">
+    <div class="dojo-header">
+      <div>
+        <span class="dojo-kicker circle-kicker">Group Exercise · Live Room</span>
+        <h2 class="dojo-title">The Writer's Circle</h2>
+      </div>
+    </div>
+    <p class="dojo-intro">A lead writer and 2–4 delegates build one story, one sentence at a time. Order is shown, not locked — anyone can add the next line whenever it's ready.</p>
+    <div class="circle-localnote" id="circleLiveNote">⚠ Live sync needs this page open as a Claude artifact — if storage isn't reachable, this room will fall back to local-only and say so below.</div>
+    <div class="circle-view" id="circleSetup">
+      <div class="circle-mode-toggle" id="circleModeToggle">
+        <button class="mode-tab active" data-mode="create">Open a new room</button>
+        <button class="mode-tab" data-mode="join">Join an existing room</button>
+      </div>
+      <div class="circle-field">
+        <label class="circle-label" id="circleCodeLabel">Room name / code</label>
+        <input class="circle-input" id="circleRoomCode" type="text" placeholder="e.g. INKWELL7, MIDNIGHT-DESK..." maxlength="24">
+      </div>
+      <div class="circle-field" id="circleTitleField">
+        <label class="circle-label">Story title or starting prompt</label>
+        <input class="circle-input" id="circleStoryTitle" type="text" placeholder="e.g. The Last Lighthouse Keeper" maxlength="80">
+      </div>
+      <div class="circle-field" id="circleCountField">
+        <label class="circle-label">How many delegates? (plus the lead writer)</label>
+        <div class="circle-delegate-count" id="circleDelegateCount">
+          <button class="count-chip" data-count="2">2</button>
+          <button class="count-chip" data-count="3">3</button>
+          <button class="count-chip active" data-count="4">4</button>
+        </div>
+      </div>
+      <div class="circle-setup-error" id="circleSetupError"></div>
+      <button class="dojo-btn dojo-btn-primary circle-create-btn" id="circleCreateBtn">Open the Circle</button>
+    </div>
+    <div class="circle-view" id="circleJoinRole" hidden>
+      <p class="dojo-intro" style="margin-top:0;">Joined room <strong id="circleJoinRoomLabel"></strong> — <span id="circleJoinStoryLabel"></span></p>
+      <p class="circle-label" style="margin-bottom:10px;">Which role are you writing as?</p>
+      <div id="circleJoinRoleList"></div>
+      <button class="dojo-btn dojo-btn-secondary" id="circleJoinBackBtn" style="margin-top:12px;">← Back</button>
+    </div>
+    <div class="circle-view" id="circleRoom" hidden>
+      <div class="circle-room-header">
+        <div>
+          <span class="circle-room-code-label">Room <span class="circle-status-dot" id="circleStatusDot"></span></span>
+          <span class="circle-room-code" id="circleRoomCodeDisplay">INKWELL7</span>
+        </div>
+        <div class="circle-room-header-actions">
+          <button class="dojo-btn dojo-btn-secondary" id="circleCopyBtn">Copy invite</button>
+          <button class="dojo-btn dojo-btn-secondary circle-leave-btn" id="circleLeaveBtn">Leave room</button>
+        </div>
+      </div>
+      <div class="circle-invite-note" id="circleInviteNote">Send the code <strong id="circleInviteCode">INKWELL7</strong> to your circle — anyone who opens this same Enclave and joins with that code sees this story update live.</div>
+      <h3 class="circle-story-title" id="circleStoryTitleDisplay">The Last Lighthouse Keeper</h3>
+      <div class="circle-role-row">
+        <label class="circle-label">Writing as:</label>
+        <select class="circle-role-select" id="circleRoleSelect"></select>
+      </div>
+      <div class="circle-page" id="circlePage">
+        <p class="circle-page-empty" id="circlePageEmpty">No sentences yet — the lead writer goes first.</p>
+      </div>
+      <div class="circle-meter-row">
+        <span id="circleSentenceCount">0 sentences</span>
+        <span id="circleWordCount">0 words</span>
+        <span>~<span id="circlePagePct">0</span>% of a page</span>
+      </div>
+      <div class="circle-turn-hint" id="circleTurnHint"></div>
+      <div class="circle-error" id="circleRoomError"></div>
+      <textarea class="dojo-textarea circle-textarea" id="circleSentenceInput" placeholder="Write the next sentence..." rows="2"></textarea>
+      <div class="dojo-actions">
+        <button class="dojo-btn dojo-btn-secondary" id="circleUndoBtn">Undo last sentence</button>
+        <button class="dojo-btn dojo-btn-primary" id="circleAddBtn">Add sentence</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <nav class="keys">
+      <button class="key active" data-target="speech">Parts of Speech</button>
+      <button class="key" data-target="poetry">Poetry Forms</button>
+      <button class="key" data-target="script">Script Formats</button>
+      <button class="key" data-target="tips">Author Tips</button>
+      <button class="key" data-target="library">📚 The Library</button>
+      <button class="key" data-target="resources">Resources</button>
+    </nav>
+
+    <main>
+      <!-- PARTS OF SPEECH -->
+      <section id="speech" class="active">
+        <span class="page-kicker">Grammar Drawer</span>
+        <h2 class="page-title">Parts of Speech</h2>
+        <div class="grid">
+          <div class="card"><span class="tag">Noun</span><h4>Naming words</h4><p>Person, place, thing, or idea.</p><div class="example">"The <u>typewriter</u> sat by the window."</div></div>
+          <div class="card"><span class="tag">Pronoun</span><h4>Stands in for a noun</h4><p>Avoids repetition: he, she, it, they, who, which.</p><div class="example">"She put it down."</div></div>
+          <div class="card"><span class="tag">Verb</span><h4>Action or state</h4><p>What the subject does or is.</p><div class="example">"The ink <u>bled</u> through the page."</div></div>
+          <div class="card"><span class="tag">Adjective</span><h4>Modifies a noun</h4><p>Describes quality, quantity, or type.</p><div class="example">"A <u>weathered</u> notebook."</div></div>
+          <div class="card"><span class="tag">Adverb</span><h4>Modifies a verb, adjective, or other adverb</h4><p>Often answers how, when, where, how much.</p><div class="example">"She wrote <u>furiously</u>."</div></div>
+          <div class="card"><span class="tag">Preposition</span><h4>Shows relation</h4><p>Connects a noun to the rest of the sentence.</p><div class="example">"The letter <u>beneath</u> the lamp."</div></div>
+          <div class="card"><span class="tag">Conjunction</span><h4>Joins words or clauses</h4><p>And, but, or, because, although.</p><div class="example">"She edited, <u>but</u> the line still felt flat."</div></div>
+          <div class="card"><span class="tag">Interjection</span><h4>Exclamatory word</h4><p>Stands alone to express emotion.</p><div class="example">"<u>Ah</u>, there's the line I needed."</div></div>
+          <div class="card"><span class="tag">Article</span><h4>A, an, the</h4><p>Defines a noun as specific or general.</p><div class="example">"<u>The</u> manuscript, <u>a</u> draft."</div></div>
+        </div>
+      </section>
+
+      <!-- POETRY FORMS -->
+      <section id="poetry">
+        <span class="page-kicker">The Verse Cabinet</span>
+        <h2 class="page-title">Types of Poetry</h2>
+        <h3 class="group-head">Fixed Forms — Rhyme &amp; Meter</h3>
+        <div class="grid">
+          <div class="card"><span class="tag">14 lines · iambic pentameter</span><h4>Sonnet</h4><p>Shakespearean: three quatrains (ABAB CDCD EFEF) and a closing couplet (GG). Petrarchan: an octave (ABBAABBA) posing a tension, then a sestet that resolves it.</p><div class="example">"Shall I compare thee to a summer's day?" — Shakespeare</div></div>
+          <div class="card"><span class="tag">19 lines · two refrains</span><h4>Villanelle</h4><p>Five tercets (ABA) plus a closing quatrain (ABAA). Lines 1 and 3 of the first tercet repeat alternately as refrains, then close the poem.</p><div class="example">"Do not go gentle into that good night." — Dylan Thomas</div></div>
+          <div class="card"><span class="tag">39 lines · 6 end-words</span><h4>Sestina</h4><p>Six stanzas of six lines, reusing the same six end-words in a rotating order, closed by a three-line envoi using all six words again.</p><div class="example">A demanding constraint form, favored for obsessive returns to an idea.</div></div>
+          <div class="card"><span class="tag">5 lines · AABBA</span><h4>Limerick</h4><p>Five lines, anapestic rhythm, rhyme scheme AABBA. Lines 1, 2, and 5 are longer; lines 3 and 4 shorter. Almost always comic.</p><div class="example">"There was an Old Man with a beard..." — Edward Lear</div></div>
+          <div class="card"><span class="tag">Couplets · 5–15+</span><h4>Ghazal</h4><p>Persian/Arabic in origin. Built from autonomous couplets sharing a refrain and rhyme, often circling themes of longing or loss.</p><div class="example">Each couplet hits like its own small poem within the larger one.</div></div>
+          <div class="card"><span class="tag">Unrhymed · iambic pentameter</span><h4>Blank Verse</h4><p>Unrhymed but metered — almost always iambic pentameter. The dominant form of English dramatic and epic verse.</p><div class="example">Used throughout Shakespeare's plays and Milton's <em>Paradise Lost</em>.</div></div>
+        </div>
+        <h3 class="group-head">Japanese &amp; Syllabic Forms</h3>
+        <div class="grid">
+          <div class="card"><span class="tag">3 lines · 5-7-5</span><h4>Haiku</h4><p>Traditionally nature-focused, capturing a single present-tense moment. Often built on a "cutting" — a juxtaposition between two images.</p><div class="example">An old silent pond / A frog jumps into the pond / Splash! Silence again. — Bashō</div></div>
+          <div class="card"><span class="tag">5 lines · 5-7-5-7-7</span><h4>Tanka</h4><p>Older than haiku — adds two 7-syllable lines that often turn toward emotion or personal reflection rather than pure observation.</p><div class="example">Classical Japanese court poets used tanka for love poems and letters.</div></div>
+          <div class="card"><span class="tag">5 lines · 2-4-6-8-2 syllables</span><h4>Cinquain</h4><p>American form (Adelaide Crapsey, early 1900s), inspired by haiku and tanka, building to a peak at line 4 and a sharp two-syllable close.</p><div class="example">A compact form that teaches economy fast.</div></div>
+        </div>
+        <h3 class="group-head">Repetition &amp; Constraint Forms</h3>
+        <div class="grid">
+          <div class="card"><span class="tag">4-line stanzas · repeating lines</span><h4>Pantoum</h4><p>Lines 2 and 4 of each stanza become lines 1 and 3 of the next. The final stanza often returns to the poem's opening line.</p><div class="example">Well suited to cyclical or obsessive themes — memory, ritual, grief.</div></div>
+          <div class="card"><span class="tag">Spelled message</span><h4>Acrostic</h4><p>The first letter of each line spells a word or phrase vertically — a name, a theme, a hidden message.</p><div class="example">Often used in dedications or playful, hidden-message poems.</div></div>
+          <div class="card"><span class="tag">Visual shape</span><h4>Concrete / Shape Poetry</h4><p>The poem's visual arrangement on the page mirrors its subject — meaning lives in layout as much as language.</p><div class="example">George Herbert's "Easter Wings" shapes its stanzas like wings.</div></div>
+          <div class="card"><span class="tag">Assembled text</span><h4>Found Poem</h4><p>Built from existing text — articles, letters, signs, overheard speech — rearranged into verse.</p><div class="example">A way of finding music in language that wasn't written as poetry.</div></div>
+        </div>
+        <h3 class="group-head">Open &amp; Occasional Forms</h3>
+        <div class="grid">
+          <div class="card"><span class="tag">Unrhymed · no fixed meter</span><h4>Free Verse</h4><p>No fixed meter or rhyme — rhythm comes from natural speech patterns, line breaks, and white space.</p><div class="example">Used widely by Whitman, Ginsberg, and most contemporary poets.</div></div>
+          <div class="card"><span class="tag">No set length</span><h4>Ode</h4><p>A formal direct address to a person, place, or thing — praising or meditating on its significance.</p><div class="example">"Ode to a Nightingale" — Keats</div></div>
+          <div class="card"><span class="tag">Mournful</span><h4>Elegy</h4><p>A reflective poem mourning a loss, traditionally moving from grief toward consolation or acceptance.</p><div class="example">"O Captain! My Captain!" — Whitman</div></div>
+          <div class="card"><span class="tag">Narrative · quatrains</span><h4>Ballad</h4><p>Tells a story, usually in quatrains with ABAB or ABCB rhyme, historically meant to be sung.</p><div class="example">"The Rime of the Ancient Mariner" — Coleridge</div></div>
+          <div class="card"><span class="tag">Book-length · heroic</span><h4>Epic</h4><p>A long narrative poem on a grand subject, traditionally opening in medias res. The oldest major form in the Western tradition.</p><div class="example"><em>The Odyssey</em>, <em>Paradise Lost</em>.</div></div>
+        </div>
+      </section>
+
+      <!-- SCRIPT FORMATS -->
+      <section id="script">
+        <span class="page-kicker">The Format Drawer</span>
+        <h2 class="page-title">Script Writing Tips &amp; Templates</h2>
+        <div class="script-block">
+          <span class="format-label">Screenplay — Scene Heading + Action + Dialogue</span>
+          <pre>INT. NEWSROOM - NIGHT
+
+Rows of empty desks. One lamp still on. MAYA (30s,
+sleeves rolled up) stares at a blinking cursor.
+
+                    MAYA
+          Run it. We run it tonight.
+
+                    EDITOR (O.S.)
+          You sure about the source?
+
+                    MAYA
+          I'm sure about the story.</pre>
+          <div class="note">Standard: 12pt Courier, scene headings in caps, character names centered above dialogue. (O.S.) = off screen, (V.O.) = voice over.</div>
+        </div>
+        <div class="script-block">
+          <span class="format-label">Stage Play — Character + Stage Direction</span>
+          <pre>MAYA enters, coat still on, rain-damp.
+
+MAYA: (setting down her bag) Tell me he didn't run it
+without me.
+
+EDITOR: (not looking up) He ran it without you.</pre>
+          <div class="note">Conventions vary by publisher. Stage directions usually italicized or parenthetical.</div>
+        </div>
+        <div class="script-block">
+          <span class="format-label">Podcast / Audio Script</span>
+          <pre>[SOUND: rain on a window, distant traffic]
+
+HOST: Some stories find you. This one found me on a
+Tuesday, three minutes before deadline.
+
+[MUSIC: low pulse, fades under]</pre>
+          <div class="note">Bracketed cues for sound and music; written for the ear, so shorter sentences read better aloud.</div>
+        </div>
+        <div class="script-block">
+          <span class="format-label">Video Game / Interactive Dialogue</span>
+          <pre>NODE: newsroom_confrontation_01
+SPEAKER: Maya
+LINE: "I'm not killing this story. Not for you, not
+for anyone upstairs."
+
+  [PLAYER CHOICE]
+  > "Then I can't protect you." -> GOTO node_threat_02
+  > "...Then neither will I." -> GOTO node_ally_02
+  > [Say nothing] -> GOTO node_silence_02
+
+TRIGGER: flag_editor_trust -1</pre>
+          <div class="note">Interactive scripts are written as branching nodes. Each line is tagged so it can be pulled into a dialogue engine; player choices route to other nodes, and flags track story-state changes.</div>
+        </div>
+        <h3 class="group-head">Formatting Rules Reference</h3>
+        <ul class="tip-list">
+          <li><strong>Font &amp; size:</strong> Industry-standard screenplay format is 12pt Courier — a monospaced font ensures the page-to-minute timing rule holds.</li>
+          <li><strong>Margins (screenplay):</strong> Roughly 1.5" left, 1" right, 1" top/bottom.</li>
+          <li><strong>Scene headings (sluglines):</strong> ALL CAPS, format is INT./EXT. — LOCATION — TIME.</li>
+          <li><strong>Transitions:</strong> CUT TO:, DISSOLVE TO:, SMASH CUT TO: — right-aligned, used sparingly.</li>
+          <li><strong>Parentheticals:</strong> Brief direction under the character cue — used sparingly for tone, not full stage business.</li>
+        </ul>
+      </section>
+
+      <!-- AUTHOR TIPS -->
+      <section id="tips">
+        <span class="page-kicker">Notes from the Desk</span>
+        <h2 class="page-title">Author Tips</h2>
+        <h3 class="group-head">On Craft</h3>
+        <ul class="tip-list">
+          <li><strong>Write the bad first draft.</strong> You can't edit a blank page — get the shape down, fix it later.</li>
+          <li><strong>Read it aloud.</strong> Your ear catches clunky rhythm your eye skips past.</li>
+          <li><strong>Cut the first paragraph.</strong> Often the real opening is one paragraph in.</li>
+          <li><strong>Show, then trust the reader.</strong> You don't need to explain the image you just gave them.</li>
+          <li><strong>Specific beats general.</strong> "A 1962 Selectric" does more work than "an old typewriter."</li>
+        </ul>
+        <h3 class="group-head">On Process</h3>
+        <ul class="tip-list">
+          <li><strong>Same time, same place.</strong> Routine lowers the resistance to starting.</li>
+          <li><strong>Set a small daily target.</strong> A page or 300 words is sustainable; a finished novel by Friday isn't.</li>
+          <li><strong>Separate writing from editing.</strong> Drafting and revising use different mental gears — don't run both at once.</li>
+          <li><strong>Keep a stray-lines file.</strong> Lines and images that don't fit today's piece often fit a future one.</li>
+        </ul>
+        <h3 class="group-head">On Journalism Specifically</h3>
+        <ul class="tip-list">
+          <li><strong>Lead with the most important fact,</strong> not the most interesting scene-setter — the inverted pyramid still works.</li>
+          <li><strong>Attribute clearly.</strong> Readers should always know who said what, and how you know it.</li>
+          <li><strong>Verify, then verify again.</strong> A second independent source for any contested claim.</li>
+        </ul>
+      </section>
+
+      <!-- THE LIBRARY -->
+      <section id="library">
+        <span class="page-kicker">The Reading Room</span>
+        <h2 class="page-title">The Library</h2>
+
+        <!-- Time strip -->
+        <div class="library-time-strip" id="libraryTimeStrip">
+          <span class="time-strip-icon" id="libraryIcon">🌙</span>
+          <div class="time-strip-text" id="libraryTimeText"><strong>Evening reading hour.</strong> The best writers read as much as they write. Pull something from the shelves, or search the full Gutenberg catalogue below.</div>
+        </div>
+
+        <!-- Gutenberg Hero -->
+        <div class="library-hero">
+          <div class="library-hero-inner">
+            <span class="library-lamp">🏛️</span>
+            <div class="library-hero-title">Project Gutenberg</div>
+            <div class="library-hero-sub">Over 70,000 free public domain ebooks — novels, poetry, plays, essays, and history. Every title here has been out of copyright for decades. Read in your browser, download to any device, keep forever.</div>
+            <div class="library-cta-row">
+              <a class="library-cta-btn library-cta-btn-primary" href="https://www.gutenberg.org" target="_blank" rel="noopener">Open Gutenberg ↗</a>
+              <a class="library-cta-btn library-cta-btn-secondary" href="https://www.gutenberg.org/browse/scores/top" target="_blank" rel="noopener">Top 100 Books ↗</a>
+            </div>
+            <div class="library-cta-note">Free, no login, no subscription. The most important library on the internet.</div>
+          </div>
+        </div>
+
+        <!-- Gutenberg Search -->
+        <div class="guten-search-box">
+          <h3>Search the Catalogue</h3>
+          <p class="guten-search-sub">Search Gutenberg's full catalogue by title or author. Results open directly on Gutenberg — read online or download as EPUB, Kindle, or plain text.</p>
+          <div class="guten-search-row">
+            <input class="guten-search-input" id="gutenSearchInput" type="text" placeholder="Search by title or author..." maxlength="80">
+            <button class="guten-search-btn" id="gutenSearchBtn">Search →</button>
+          </div>
+          <div class="guten-status" id="gutenStatus"></div>
+          <div class="guten-results" id="gutenResults"></div>
+        </div>
+
+        <!-- Curated Shelves -->
+        <h3 class="group-head">Shelves for Writers</h3>
+
+        <p style="font-size:0.84rem;color:var(--bone-dim);margin:0 0 14px;line-height:1.5;">A hand-picked starting point. All titles link directly to their Gutenberg page — click Read to open in your browser.</p>
+
+        <h3 class="group-head" style="font-size:0.95rem;">The Poet's Shelf</h3>
+        <div class="shelf-row" id="shelfPoetry"></div>
+
+        <h3 class="group-head" style="font-size:0.95rem;">The Novelist's Shelf</h3>
+        <div class="shelf-row" id="shelfNovels"></div>
+
+        <h3 class="group-head" style="font-size:0.95rem;">Essays &amp; On Writing</h3>
+        <div class="shelf-row" id="shelfEssays"></div>
+
+        <h3 class="group-head" style="font-size:0.95rem;">Plays &amp; Drama</h3>
+        <div class="shelf-row" id="shelfPlays"></div>
+
+        <!-- Reading Journal -->
+        <div class="reading-journal">
+          <div class="journal-header">
+            <div>
+              <span class="journal-kicker">Your Reading Log</span>
+              <h2 class="journal-title">Reading Journal</h2>
+            </div>
+            <div class="journal-book-count">
+              <span class="journal-count-num" id="journalCount">0</span>
+              <span class="journal-count-label">books<br>logged</span>
+            </div>
+          </div>
+          <p class="journal-intro">Track what you're reading, what you've finished, and what's queued. Add notes, reactions, or lines that struck you — this stays private in your browser.</p>
+
+          <div class="journal-add-row">
+            <div class="journal-field">
+              <label>Title</label>
+              <input class="journal-input" id="journalTitleInput" type="text" placeholder="Book title..." maxlength="100">
+            </div>
+            <div class="journal-field">
+              <label>Author</label>
+              <input class="journal-input" id="journalAuthorInput" type="text" placeholder="Author..." maxlength="80">
+            </div>
+            <button class="journal-add-btn" id="journalAddBtn">Add book</button>
+          </div>
+
+          <div class="journal-entries" id="journalEntries">
+            <div class="journal-empty" id="journalEmpty">Your shelf is empty. Add a book above to start your log — or pull one from the shelves and add it here.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RESOURCES -->
+      <section id="resources">
+        <span class="page-kicker">The Reference Shelf</span>
+        <h2 class="page-title">Sources &amp; Resources</h2>
+        <h3 class="group-head">Style &amp; Reference</h3>
+        <div class="resource-row"><span class="rname">The Elements of Style</span><span class="rdesc">Strunk &amp; White — concise grammar and style guide</span></div>
+        <div class="resource-row"><span class="rname">AP Stylebook</span><span class="rdesc">Standard for journalism formatting and usage</span></div>
+        <div class="resource-row"><span class="rname">Chicago Manual of Style</span><span class="rdesc">Standard for books, academic, and long-form publishing</span></div>
+        <div class="resource-row"><span class="rname">On Writing Well</span><span class="rdesc">William Zinsser — nonfiction and journalistic craft</span></div>
+        <h3 class="group-head">Poetry &amp; Craft</h3>
+        <div class="resource-row"><span class="rname">Poetry Foundation</span><span class="rdesc">Poems, poet bios, and form glossaries</span></div>
+        <div class="resource-row"><span class="rname">The Poetry Handbook</span><span class="rdesc">John Lennard — meter, form, and terminology</span></div>
+        <h3 class="group-head">Script &amp; Screenwriting</h3>
+        <div class="resource-row"><span class="rname">Save the Cat</span><span class="rdesc">Blake Snyder — screenplay structure</span></div>
+        <div class="resource-row"><span class="rname">The Script Lab</span><span class="rdesc">Templates, sample scripts, format breakdowns</span></div>
+        <h3 class="group-head">Free Digital Libraries</h3>
+        <div class="resource-row">
+          <span class="rname"><a href="https://www.gutenberg.org" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;">Project Gutenberg ↗</a></span>
+          <span class="rdesc">70,000+ free public domain ebooks — the essential writer's library</span>
+        </div>
+        <div class="resource-row">
+          <span class="rname"><a href="https://standardebooks.org" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;">Standard Ebooks ↗</a></span>
+          <span class="rdesc">Beautifully formatted, carefully proofread editions of public domain classics</span>
+        </div>
+        <div class="resource-row">
+          <span class="rname"><a href="https://archive.org/details/texts" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none;">Internet Archive — Texts ↗</a></span>
+          <span class="rdesc">Millions of scanned books, magazines, and documents — includes controlled digital lending</span>
+        </div>
+        <h3 class="group-head">Organizations</h3>
+        <div class="resource-row"><span class="rname">Society of Professional Journalists</span><span class="rdesc">Ethics guidelines and journalism resources</span></div>
+        <div class="resource-row"><span class="rname">Academy of American Poets</span><span class="rdesc">Poem-a-day, poet resources, and events</span></div>
+      </section>
+    </main>
+  </div>
+
+  <footer>The Writer's Enclave — built for the love of the Bobby Quest series, and all Dragons.</footer>
+</div>
+
+<script>
+  /* ---- TITLE / HOME ---- */
+  const titleScreen = document.getElementById('titleScreen');
+  const mainApp = document.getElementById('mainApp');
+  const homeFab = document.getElementById('homeFab');
+  document.getElementById('enterBtn').addEventListener('click', () => {
+    titleScreen.style.display = 'none';
+    mainApp.hidden = false;
+    homeFab.classList.add('visible');
+  });
+  homeFab.addEventListener('click', () => {
+    mainApp.hidden = true;
+    homeFab.classList.remove('visible');
+    titleScreen.style.display = 'flex';
+  });
+
+  /* ---- NAV KEYS ---- */
+  document.querySelectorAll('nav.keys .key').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('nav.keys .key').forEach(k => k.classList.remove('active'));
+      document.querySelectorAll('main section').forEach(s => s.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.target).classList.add('active');
+    });
+  });
+
+  /* ---- LIBRARY TIME STRIP ---- */
+  function setLibraryTime(){
+    const h = new Date().getHours();
+    const icon = document.getElementById('libraryIcon');
+    const text = document.getElementById('libraryTimeText');
+    if (h >= 21 || h < 5){
+      icon.textContent = '🕯️';
+      text.innerHTML = '<strong>Late-night reading.</strong> The Enclave is quietest now. A good hour to get lost in something long and old.';
+    } else if (h >= 17){
+      icon.textContent = '🌙';
+      text.innerHTML = '<strong>Evening reading hour.</strong> The best writers read as much as they write. Pull something from the shelves, or search the Gutenberg catalogue below.';
+    } else if (h >= 12){
+      icon.textContent = '☀️';
+      text.innerHTML = '<strong>Afternoon in the library.</strong> A good time to read one chapter, then write one page. The books have been waiting.';
+    } else {
+      icon.textContent = '🌅';
+      text.innerHTML = '<strong>Morning reading.</strong> Start the day with a page or two before the day starts on you. Everything else can wait.';
+    }
+  }
+  setLibraryTime();
+
+  /* ---- CURATED SHELVES ---- */
+  const shelves = {
+    poetry: [
+      { title: "Leaves of Grass", author: "Walt Whitman", note: "The American epic of the self — boundless, democratic, alive.", id: 1322 },
+      { title: "The Waste Land & Other Poems", author: "T.S. Eliot", note: "Modernism's cornerstone. Dense, but every reading reveals more.", id: 1321 },
+      { title: "Poems", author: "Emily Dickinson", note: "800+ poems of compression, slant rhyme, and startling clarity.", id: 12242 },
+      { title: "The Raven and Other Poems", author: "Edgar Allan Poe", note: "Masterclass in sound and obsession. Memorize at least one.", id: 17192 },
+      { title: "Songs of Innocence and Experience", author: "William Blake", note: "Two states of the human soul, set against each other.", id: 1934 },
+    ],
+    novels: [
+      { title: "Jane Eyre", author: "Charlotte Brontë", note: "One of the most assured first-person voices in English fiction.", id: 1260 },
+      { title: "The Brothers Karamazov", author: "Fyodor Dostoyevsky", note: "The great novel of faith, doubt, and murder. Read it slowly.", id: 28054 },
+      { title: "Middlemarch", author: "George Eliot", note: "Virginia Woolf called it one of the few English novels written for grown-up people.", id: 145 },
+      { title: "Moby-Dick", author: "Herman Melville", note: "Half adventure, half philosophy. A novel that teaches you how to write.", id: 2701 },
+      { title: "Crime and Punishment", author: "Fyodor Dostoyevsky", note: "A thriller that happens to be one of the deepest psychological novels ever written.", id: 2554 },
+    ],
+    essays: [
+      { title: "Essays of Montaigne", author: "Michel de Montaigne", note: "The inventor of the personal essay. Everything goes back here.", id: 3600 },
+      { title: "Self-Reliance", author: "Ralph Waldo Emerson", note: "The founding document of American individualism — still challenges.", id: 16643 },
+      { title: "A Room of One's Own", author: "Virginia Woolf", note: "On writing, women, and the economic conditions of literature.", id: 5901 },
+      { title: "The Souls of Black Folk", author: "W.E.B. Du Bois", note: "Essays of history, sociology, and literature that still define a genre.", id: 408 },
+    ],
+    plays: [
+      { title: "Hamlet", author: "William Shakespeare", note: "The play every playwright has to reckon with. Read it as a writer, not a student.", id: 1524 },
+      { title: "A Midsummer Night's Dream", author: "William Shakespeare", note: "The most purely theatrical of the plays — about performance itself.", id: 1514 },
+      { title: "The Importance of Being Earnest", author: "Oscar Wilde", note: "A masterclass in wit and structure. Every line earns its place.", id: 844 },
+      { title: "Hedda Gabler", author: "Henrik Ibsen", note: "The modern play that broke theater open. Study the subtext.", id: 4093 },
+    ]
+  };
+
+  function renderShelves(){
+    const map = { poetry: 'shelfPoetry', novels: 'shelfNovels', essays: 'shelfEssays', plays: 'shelfPlays' };
+    Object.entries(shelves).forEach(([key, books]) => {
+      const el = document.getElementById(map[key]);
+      el.innerHTML = books.map(b => `
+        <div class="shelf-book">
+          <div class="sb-title">${b.title}</div>
+          <div class="sb-author">${b.author}</div>
+          <div class="sb-note">${b.note}</div>
+          <div class="shelf-book-actions">
+            <a class="shelf-book-btn sb-btn-read" href="https://www.gutenberg.org/ebooks/${b.id}" target="_blank" rel="noopener">Read →</a>
+            <button class="shelf-book-btn sb-btn-add" onclick="addFromShelf('${b.title.replace(/'/g,"\\'")}','${b.author.replace(/'/g,"\\'")}')">+ Journal</button>
+          </div>
+        </div>
+      `).join('');
+    });
+  }
+  renderShelves();
+
+  /* ---- GUTENBERG SEARCH ---- */
+  const gutenInput = document.getElementById('gutenSearchInput');
+  const gutenStatus = document.getElementById('gutenStatus');
+  const gutenResults = document.getElementById('gutenResults');
+
+  async function searchGutenberg(query){
+    gutenStatus.className = 'guten-status loading';
+    gutenStatus.textContent = 'Searching Gutenberg…';
+    gutenResults.innerHTML = '';
+    try {
+      const url = `https://gutendex.com/books/?search=${encodeURIComponent(query)}&languages=en`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Network error');
+      const data = await res.json();
+      gutenStatus.textContent = '';
+      if (!data.results || data.results.length === 0){
+        gutenStatus.className = 'guten-status';
+        gutenStatus.textContent = 'No results found. Try a different search — author surname or partial title works well.';
+        return;
+      }
+      gutenResults.innerHTML = data.results.slice(0, 8).map(book => {
+        const author = book.authors.length ? book.authors.map(a => a.name).join(', ') : 'Unknown';
+        const subjects = (book.subjects || []).slice(0, 3).join(' · ');
+        const gutUrl = `https://www.gutenberg.org/ebooks/${book.id}`;
+        const titleSafe = book.title.replace(/'/g, "\\'");
+        const authorSafe = author.replace(/'/g, "\\'");
+        return `
+          <div class="guten-result-card">
+            <div class="guten-result-info">
+              <div class="gr-title">${book.title}</div>
+              <div class="gr-author">${author}</div>
+              ${subjects ? `<div class="gr-subjects">${subjects}</div>` : ''}
+            </div>
+            <div class="guten-result-actions">
+              <a class="guten-link-btn guten-btn-read" href="${gutUrl}" target="_blank" rel="noopener">Read →</a>
+              <button class="guten-link-btn guten-btn-add" onclick="addFromShelf('${titleSafe}','${authorSafe}')">+ Journal</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch(e){
+      gutenStatus.className = 'guten-status error';
+      gutenStatus.textContent = 'Search unavailable — check your connection, or visit gutenberg.org directly.';
+    }
+  }
+
+  document.getElementById('gutenSearchBtn').addEventListener('click', () => {
+    const q = gutenInput.value.trim();
+    if (q) searchGutenberg(q);
+  });
+  gutenInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){ const q = gutenInput.value.trim(); if (q) searchGutenberg(q); }
+  });
+
+  /* ---- READING JOURNAL ---- */
+  let journal = JSON.parse(localStorage.getItem('enclave-journal') || '[]');
+
+  function saveJournal(){ localStorage.setItem('enclave-journal', JSON.stringify(journal)); }
+
+  function renderJournal(){
+    const el = document.getElementById('journalEntries');
+    const empty = document.getElementById('journalEmpty');
+    document.getElementById('journalCount').textContent = journal.length;
+    if (journal.length === 0){
+      empty.style.display = 'block';
+      el.innerHTML = '';
+      el.appendChild(empty);
+      return;
+    }
+    empty.style.display = 'none';
+    el.innerHTML = journal.map((entry, i) => {
+      const statusClass = entry.status === 'reading' ? 'status-reading' : entry.status === 'finished' ? 'status-finished' : 'status-queue';
+      const statusLabel = entry.status === 'reading' ? 'Reading' : entry.status === 'finished' ? 'Finished' : 'In Queue';
+      return `
+        <div class="journal-entry" id="jentry-${i}">
+          <div class="journal-entry-header">
+            <div>
+              <div class="journal-entry-title">${entry.title}</div>
+              <div class="journal-entry-author">${entry.author || 'Unknown author'}</div>
+            </div>
+            <div class="journal-entry-meta">
+              <span class="journal-status ${statusClass}">${statusLabel}</span>
+              <button class="journal-delete-btn" onclick="deleteJournalEntry(${i})" title="Remove">✕</button>
+            </div>
+          </div>
+          <div class="journal-status-toggle">
+            <button class="status-chip ${entry.status === 'queue' ? 'active-queue' : ''}" onclick="setStatus(${i},'queue')">In Queue</button>
+            <button class="status-chip ${entry.status === 'reading' ? 'active-reading' : ''}" onclick="setStatus(${i},'reading')">Reading</button>
+            <button class="status-chip ${entry.status === 'finished' ? 'active-finished' : ''}" onclick="setStatus(${i},'finished')">Finished</button>
+          </div>
+          <textarea class="journal-notes-area" rows="2" placeholder="Notes, reactions, lines that struck you…" oninput="saveNote(${i},this.value)">${entry.notes || ''}</textarea>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function addFromShelf(title, author){
+    if (journal.find(e => e.title === title)){
+      alert(`"${title}" is already in your journal.`); return;
+    }
+    journal.unshift({ title, author, status: 'queue', notes: '' });
+    saveJournal(); renderJournal();
+    // Switch to library tab if not already there
+    document.querySelectorAll('nav.keys .key').forEach(k => {
+      if (k.dataset.target === 'library'){ k.click(); }
+    });
+    setTimeout(() => {
+      document.querySelector('.reading-journal').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+  }
+
+  function deleteJournalEntry(i){ journal.splice(i,1); saveJournal(); renderJournal(); }
+  function setStatus(i, s){ journal[i].status = s; saveJournal(); renderJournal(); }
+  function saveNote(i, val){ journal[i].notes = val; saveJournal(); }
+
+  document.getElementById('journalAddBtn').addEventListener('click', () => {
+    const t = document.getElementById('journalTitleInput').value.trim();
+    const a = document.getElementById('journalAuthorInput').value.trim();
+    if (!t){ document.getElementById('journalTitleInput').focus(); return; }
+    if (journal.find(e => e.title === t)){ alert(`"${t}" is already in your journal.`); return; }
+    journal.unshift({ title: t, author: a, status: 'queue', notes: '' });
+    saveJournal(); renderJournal();
+    document.getElementById('journalTitleInput').value = '';
+    document.getElementById('journalAuthorInput').value = '';
+  });
+
+  renderJournal();
+
+  /* ---- QUOTES ---- */
+  const quotes = [
+    { q: "There is no agony like bearing an untold story inside you.", a: "Maya Angelou" },
+    { q: "The first draft of anything is garbage.", a: "Ernest Hemingway" },
+    { q: "You can always edit a bad page. You can't edit a blank page.", a: "Jodi Picoult" },
+    { q: "If there's a book that you want to read, but it hasn't been written yet, then you must write it.", a: "Toni Morrison" },
+    { q: "A writer is someone for whom writing is more difficult than it is for other people.", a: "Thomas Mann" },
+    { q: "Read, read, read. Read everything — trash, classics, good and bad, and see how they do it.", a: "William Faulkner" },
+    { q: "Writing is the painting of the voice.", a: "Voltaire" },
+    { q: "Not a wasted word. This has been a main point to my literary thinking all my life.", a: "Hunter S. Thompson" },
+    { q: "The scariest moment is always just before you start.", a: "Stephen King" },
+    { q: "There is no real ending. It's just the place where you stop the story.", a: "Frank Herbert" },
+    { q: "Fill your paper with the breathings of your heart.", a: "William Wordsworth" },
+  ];
+  let lastQuoteIdx = 0;
+  function newQuote(){
+    let idx; do { idx = Math.floor(Math.random() * quotes.length); } while (idx === lastQuoteIdx);
+    lastQuoteIdx = idx;
+    document.getElementById('quoteText').textContent = quotes[idx].q;
+    document.getElementById('quoteCite').textContent = '— ' + quotes[idx].a;
+  }
+
+  /* ---- THE DOJO ---- */
+  const dailyWords = ["luminous","threadbare","kindling","undertow","vellum","static","hush","ember","tangle","wayfarer","brittle","echo","salt","drift","lantern"];
+  function dayIndex(mod){ const s = new Date(2026,0,1); const d = Math.floor((new Date()-s)/86400000); return ((d%mod)+mod)%mod; }
+  const todaysWord = dailyWords[dayIndex(dailyWords.length)];
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  const exercises = [
+    {
+      key:"word", label:"Daily Word", title:"Daily Word",
+      text:()=>`Use today's word — "${todaysWord}" — in a single sentence. Any context, any tone.`,
+      placeholder:"Write your sentence...",
+      check:(val)=>{
+        if(!val.trim()) return null;
+        const used = val.toLowerCase().includes(todaysWord.toLowerCase());
+        const wc = (val.trim().match(/\S+/g)||[]).length;
+        if(used && wc<=10) return pick([`Tight sentence — ${wc} words — with "${todaysWord}" doing real work. Short sentences make every word load-bearing.`,`${wc} words, and "${todaysWord}" isn't hiding — it's the point of the sentence. Good instinct.`]);
+        if(used) return pick([`"${todaysWord}" shows up in a longer sentence (${wc} words). Read it back and check whether it feels load-bearing or just decorative.`,`The word's in there. At ${wc} words, check if cutting it down by half still keeps "${todaysWord}" feeling necessary.`]);
+        return pick([`The word didn't show up, but ${wc} words still went down — that's the actual exercise. Try again letting it arrive somewhere unexpected, like a verb instead of a noun.`,`No "${todaysWord}" this pass. Try placing it as the very first or very last word next time.`]);
+      }
+    },
+    {
+      key:"alliteration", label:"Alliteration", title:"Alliteration Drill",
+      text:()=>"Write one sentence where at least four words start with the same sound.",
+      placeholder:"Quietly quick quills quiver...",
+      check:(val)=>{
+        if(!val.trim()) return null;
+        const words = val.toLowerCase().match(/[a-z']+/g)||[];
+        const counts = {}; words.forEach(w=>{const c=w[0]; counts[c]=(counts[c]||0)+1;});
+        const best = Math.max(0,...Object.values(counts));
+        const bl = Object.keys(counts).find(k=>counts[k]===best);
+        if(best>=5) return pick([`A run of ${best} on "${bl}" — that's well past the minimum, sitting where it's noticeable without tipping into novelty.`,`Five-plus words on "${bl}". Read it aloud and notice whether the repeated sound falls on the words that actually matter.`]);
+        if(best===4) return pick([`Four words on "${bl}" — the textbook minimum, right at the edge of noticeable without being showy.`,`Hit exactly four on "${bl}". That clears the bar. Next time, pick the sound first and build around it.`]);
+        return pick([`Best run so far is ${best} on "${bl}" — a few words short. Hard consonants (B, K, T) are easier to stack than rare ones.`,`Only ${best} on "${bl}" this round. Try starting from the sound: pick a hard consonant, list five words that start with it, then build around those.`]);
+      }
+    },
+    {
+      key:"haiku", label:"Haiku", title:"Haiku",
+      text:()=>"Three lines. Roughly 5-7-5 syllables. One clear image, one small turn.",
+      placeholder:"Line one...\nLine two...\nLine three...",
+      check:(val)=>{
+        if(!val.trim()) return null;
+        const lines = val.split('\n').filter(l=>l.trim().length);
+        const syl = lines.map(l=>(l.match(/[aeiouy]+/gi)||[]).length);
+        if(lines.length===3) return pick([`Three lines, syllables roughly ${syl.join('-')}. Look hardest at line three: does it reframe lines one and two, or just add more description?`,`Three lines logged. The form's trick is compression plus a pivot — does line three surprise you slightly?`]);
+        if(lines.length<3) return pick([`${lines.length} line${lines.length===1?'':'s'} so far. Keep going to the third line and aim the last one at reframing what came before.`,`${lines.length} in. Add the missing lines and aim the last one at turning the poem somewhere.`]);
+        return pick([`${lines.length} lines is more than the traditional three. Try cutting to the single strongest image plus the turn.`,`More lines than haiku usually uses. See which three survive the cut.`]);
+      }
+    },
+    {
+      key:"metaphor", label:"Metaphor", title:"Metaphor Stretch",
+      text:()=>"Finish this: \"Grief is...\" — write one sentence that turns it into an unexpected image.",
+      placeholder:"Grief is...",
+      check:(val)=>{
+        if(!val.trim()) return null;
+        const hasLike = /\b(like|as)\b/i.test(val);
+        const hasConc = /\b(door|window|stone|water|fire|knife|room|ocean|weight|rust|salt|ash|glass|thread|fog|tide)\w*\b/i.test(val);
+        if(hasLike) return pick([`This reads more like a simile than a true metaphor. Try cutting "like" or "as" and see if the sentence survives the more absolute claim.`,`There's a "like" doing some hedging. Removing it is a small edit with a big effect: "grief is a locked door" lands harder than "grief is like a locked door."`]);
+        if(hasConc) return pick([`Good instinct — a concrete object is standing in for the feeling, which is exactly how metaphor earns its effect.`,`A physical image carries this rather than a stated emotion. Try one more pass making it even stranger than feels comfortable.`]);
+        return pick([`The test isn't whether it's accurate — it's whether the image makes a reader feel something shift slightly.`,`Try picking an object from a completely different domain than emotion — kitchen tools, weather, traffic — and force grief into that shape.`]);
+      }
+    },
+    {
+      key:"dialogue", label:"Dialogue Snap", title:"Dialogue Snap",
+      text:()=>"Write a 3-line exchange between two characters where neither says what they actually mean.",
+      placeholder:"A: ...\nB: ...\nA: ...",
+      check:(val)=>{
+        if(!val.trim()) return null;
+        const lines = val.split('\n').filter(l=>l.trim().length);
+        const hasDirect = /\b(i feel|i'm sad|i'm angry|i love you|i hate)\b/i.test(val);
+        if(lines.length>=3 && !hasDirect) return pick([`Three exchanges, nobody stating feelings outright — that's the harder, better version. The test: could a reader guess what's actually wrong between these two without either character naming it?`,`Full exchange, no one saying the quiet part out loud. The real test is whether the friction between them implies something neither will say.`]);
+        if(lines.length>=3) return pick([`Good length, but there's a direct feeling-statement here. Once a character says the feeling out loud, the subtext closes up. Replace that line with a deflection instead.`]);
+        return pick([`${lines.length} line${lines.length===1?'':'s'} — three needed for a real back-and-forth. Try building the exchange around one character answering a completely different question than the one asked.`]);
+      }
+    }
+  ];
+
+  let currentExercise = exercises[dayIndex(exercises.length)];
+  let sessionStreak = 0;
+
+  function renderMenu(){
+    const menu = document.getElementById('dojoMenu');
+    menu.innerHTML = '';
+    exercises.forEach(ex => {
+      const chip = document.createElement('button');
+      chip.className = 'dojo-chip' + (ex.key===currentExercise.key?' active':'');
+      chip.textContent = ex.label;
+      chip.addEventListener('click', ()=>selectExercise(ex,false));
+      menu.appendChild(chip);
+    });
+  }
+
+  function selectExercise(ex, isFeatured){
+    currentExercise = ex;
+    document.getElementById('dojoTag').textContent = isFeatured ? "Today's Exercise" : "Practice Exercise";
+    document.getElementById('dojoExerciseTitle').textContent = ex.title;
+    document.getElementById('dojoExerciseText').textContent = ex.text();
+    document.getElementById('dojoTextarea').value = '';
+    document.getElementById('dojoTextarea').placeholder = ex.placeholder;
+    document.getElementById('dojoFeedback').textContent = '';
+    renderMenu();
+  }
+
+  document.getElementById('dojoShuffle').addEventListener('click', ()=>{
+    const others = exercises.filter(e=>e.key!==currentExercise.key);
+    selectExercise(others[Math.floor(Math.random()*others.length)], false);
+  });
+  document.getElementById('dojoComplete').addEventListener('click', ()=>{
+    const val = document.getElementById('dojoTextarea').value;
+    if(!val.trim()){ document.getElementById('dojoFeedback').innerHTML = "Write a line or two first — even a rough one counts."; return; }
+    sessionStreak++;
+    document.getElementById('streakCount').textContent = sessionStreak;
+    const note = currentExercise.check(val);
+    document.getElementById('dojoFeedback').innerHTML = '<span class="fb-stamp">Notes from the mat — marked complete</span>' + (note || "Logged for this session.");
+  });
+  selectExercise(currentExercise, true);
+
+  /* ---- POET'S CHALLENGE ---- */
+  const challengeForms = [
+    { key:'haiku', label:'Haiku', desc:'5-7-5 · one image, one turn' },
+    { key:'elegy', label:'Elegy', desc:'grief moving toward peace' },
+    { key:'ballad', label:'Ballad', desc:'quatrain · ABAB story' }
+  ];
+  let currentChallengeForm = challengeForms[0];
+  let challengeHighScore = 0;
+
+  const challengeDescs = {
+    haiku: { tag:'Form', title:'Haiku', text:'Three lines. 5-7-5. One image, one turn. No named feelings — show, don\'t state.' },
+    elegy: { tag:'Form', title:'Elegy', desc:'', text:'A poem of mourning — grief, loss, absence. Move toward reflection or acceptance by the end. Any length.' },
+    ballad: { tag:'Form', title:'Ballad Stanza', text:'One quatrain (4 lines) telling a small story. Aim for ABAB or ABCB rhyme. Something should change between line 1 and line 4.' }
+  };
+
+  function renderChallengeMenu(){
+    const menu = document.getElementById('challengeFormMenu');
+    menu.innerHTML = '';
+    challengeForms.forEach(f => {
+      const chip = document.createElement('button');
+      chip.className = 'dojo-chip' + (f.key===currentChallengeForm.key?' active':'');
+      chip.textContent = f.label;
+      chip.addEventListener('click', ()=>selectChallengeForm(f));
+      menu.appendChild(chip);
+    });
+  }
+  function selectChallengeForm(f){
+    currentChallengeForm = f;
+    const d = challengeDescs[f.key];
+    document.getElementById('challengeTag').textContent = d.tag;
+    document.getElementById('challengeTitle').textContent = d.title;
+    document.getElementById('challengeText').textContent = d.text;
+    document.getElementById('challengeResult').innerHTML = '';
+    renderChallengeMenu();
+  }
+  renderChallengeMenu(); selectChallengeForm(challengeForms[0]);
+
+  document.getElementById('challengeClear').addEventListener('click', ()=>{
+    document.getElementById('challengeTextarea').value='';
+    document.getElementById('challengeResult').innerHTML='';
+  });
+  document.getElementById('challengeSubmit').addEventListener('click', ()=>{
+    const val = document.getElementById('challengeTextarea').value;
+    if(!val.trim()) return;
+    let result;
+    if(currentChallengeForm.key==='haiku') result = scoreHaiku(val);
+    else if(currentChallengeForm.key==='elegy') result = scoreElegy(val);
+    else result = scoreBallad(val);
+    if(result.total > challengeHighScore){ challengeHighScore = result.total; document.getElementById('challengeHighScore').textContent = challengeHighScore; }
+    renderChallengeResult(result);
+  });
+
+  function scoreHaiku(val){
+    if(!val.trim()) return { total:0, criteria:[{name:"Form",pts:0,max:30,note:"Nothing written."},{name:"Imagery",pts:0,max:35,note:"Nothing written."},{name:"The Turn",pts:0,max:35,note:"Nothing written."}] };
+    const lines=val.split('\n').filter(l=>l.trim());
+    const syl=lines.map(l=>(l.match(/[aeiouy]+/gi)||[]).length);
+    let fPts=0,fNote='';
+    if(lines.length===3){const d=syl.reduce((s,v,i)=>s+Math.abs(v-[5,7,5][i]),0); if(d<=1){fPts=30;fNote=`Three lines, syllables ${syl.join('-')} — textbook shape.`;}else if(d<=4){fPts=22;fNote=`Three lines, syllables ${syl.join('-')} — close enough for published English haiku.`;}else{fPts=14;fNote=`Three lines, but syllables ${syl.join('-')} drift past 5-7-5.`;}}
+    else{fPts=Math.max(4,12-Math.abs(lines.length-3)*4);fNote=`${lines.length} lines instead of three.`;}
+    const sens=/\b(light|cold|warm|wind|rain|snow|sun|dark|sound|smell|touch|cool|bright|dim|wet|dry|silence|shadow|salt|stone|ash|fog|frost|fire|water|wave|leaf|bone|dust|tide|rust|glass)\w*\b/i;
+    const feel=/\b(sad|sadness|happy|grief|sorrow|joy|fear|angry|love|lonely|pain|hurt)\b/i;
+    const sh=(val.match(new RegExp(sens,'gi'))||[]).length;
+    const fh=(val.match(new RegExp(feel,'gi'))||[]).length;
+    let iPts=0,iNote='';
+    if(sh>=2&&fh===0){iPts=35;iNote="Multiple sensory details, no named feelings — exactly how haiku works.";}
+    else if(sh>=1&&fh===0){iPts=27;iNote="One concrete sensory image, no stated emotion. Good instinct.";}
+    else if(sh>=1){iPts=16;iNote="Sensory image present, but a named feeling sits alongside it — try cutting the feeling-word.";}
+    else if(fh>=1){iPts=8;iNote="The poem states a feeling rather than showing an image.";}
+    else{iPts=12;iNote="No clear sensory anchor detected.";}
+    let tPts=0,tNote='';
+    if(lines.length===3){const l1=new Set((lines[0].toLowerCase().match(/[a-z]+/g)||[]));const l3=(lines[2].toLowerCase().match(/[a-z]+/g)||[]);const ov=l3.filter(w=>l1.has(w)).length;if(ov===0&&l3.length){tPts=35;tNote="Line three introduces entirely new language — strong sign it's actually turning the poem.";}else if(ov<=1){tPts=26;tNote="Line three mostly breaks new ground — healthy pivot.";}else{tPts=14;tNote="Line three repeats some of line one's vocabulary — check if the ending surprises you.";}}
+    else{tPts=Math.min(10,lines.length*3);tNote="Can't fully assess the turn without three lines.";}
+    return{total:fPts+iPts+tPts,criteria:[{name:"Form & Structure",pts:fPts,max:30,note:fNote},{name:"Imagery",pts:iPts,max:35,note:iNote},{name:"The Turn (line 3)",pts:tPts,max:35,note:tNote}]};
+  }
+
+  function scoreElegy(val){
+    if(!val.trim()) return{total:0,criteria:[{name:"Subject & Tone",pts:0,max:30,note:"Nothing written."},{name:"Imagery",pts:0,max:30,note:"Nothing written."},{name:"Movement",pts:0,max:40,note:"Nothing written."}]};
+    const lines=val.split('\n').filter(l=>l.trim());
+    const wc=(val.trim().match(/\S+/g)||[]).length;
+    const loss=/\b(death|died|gone|loss|lost|grave|mourn|mourning|farewell|memory|remember|absence|missing|funeral|ashes|grief)\w*\b/i;
+    const consol=/\b(peace|rest|light|hope|again|still|remain|carry|forever|love|grateful|grace|whole)\w*\b/i;
+    let tPts=0,tNote='';
+    if(loss.test(val)&&wc>=20){tPts=26;tNote="Clear mourning register with enough length to develop the subject.";}
+    else if(loss.test(val)){tPts=18;tNote="The loss is present, though the piece is brief — elegies need room to sit with the subject.";}
+    else{tPts=8;tNote="Hard to find explicit language of loss or mourning here.";}
+    tPts=Math.min(30,tPts+(wc>=40?4:0));
+    const sens=/\b(light|cold|warm|wind|rain|snow|sun|dark|sound|silence|shadow|salt|stone|ash|fog|frost|fire|water|wave|leaf|bone|dust|tide|rust|glass)\w*\b/i;
+    const sh=(val.match(new RegExp(sens,'gi'))||[]).length;
+    let iPts=0,iNote='';
+    if(sh>=2){iPts=28;iNote="Multiple concrete, sensory details — the kind that makes an elegy feel about someone real.";}
+    else if(sh===1){iPts=20;iNote="One sensory detail present. A second concrete image would give the reader more to hold.";}
+    else{iPts=10;iNote="No strong sensory details detected — ground this in at least one physical image.";}
+    let mPts=0,mNote='';
+    if(lines.length>=4&&consol.test(val)){mPts=36;mNote="Enough room to develop and reaches toward consolation — the classic elegiac arc.";}
+    else if(lines.length>=4){mPts=26;mNote="Enough lines to develop, though the ending doesn't clearly move toward reflection.";}
+    else if(consol.test(val)){mPts=18;mNote="Gesture toward consolation, but the piece is short.";}
+    else{mPts=12;mNote=`${lines.length} lines — elegies usually need more room to move through grief.`;}
+    return{total:tPts+iPts+mPts,criteria:[{name:"Subject & Tone",pts:tPts,max:30,note:tNote},{name:"Imagery",pts:iPts,max:30,note:iNote},{name:"Movement & Development",pts:mPts,max:40,note:mNote}]};
+  }
+
+  function scoreBallad(val){
+    if(!val.trim()) return{total:0,criteria:[{name:"Narrative Motion",pts:0,max:30,note:"Nothing written."},{name:"Rhyme Scheme",pts:0,max:35,note:"Nothing written."},{name:"Form",pts:0,max:35,note:"Nothing written."}]};
+    const lines=val.split('\n').filter(l=>l.trim());
+    const lw=lines.map(l=>(l.trim().match(/[a-zA-Z']+$/)||[''])[0].toLowerCase());
+    const rh=(a,b)=>a.length>=2&&b.length>=2&&a.slice(-2)===b.slice(-2);
+    const hasPast=/\b\w+ed\b/i.test(val); const hasDialog=/["']/.test(val);
+    const avg=lines.length?(lines.reduce((a,l)=>a+(l.trim().match(/\S+/g)||[]).length,0)/lines.length):0;
+    let nPts=0,nNote='';
+    if(avg<3){nPts=Math.min(6,Math.round(lines.length*1.5));nNote=`Lines average only ${avg.toFixed(1)} words — too short to read as a told story.`;}
+    else if(lines.length>=4&&hasPast&&hasDialog){nPts=28;nNote="Past-tense narration plus quoted speech — the full storytelling toolkit ballads use.";}
+    else if(lines.length>=4&&hasPast){nPts=22;nNote="Past-tense narration carries this, giving it a settled quality that suits the form.";}
+    else if(lines.length>=4){nPts=16;nNote="Four lines present, but check whether something changes between line 1 and line 4.";}
+    else{nPts=8;nNote=`${lines.length} lines — not enough room to tell even a small story yet.`;}
+    let rPts=0,rNote='';
+    if(lines.length>=4){const ab=rh(lw[0],lw[2]);const bd=rh(lw[1],lw[3]);if(ab&&bd){rPts=35;rNote="Full ABAB rhyme — the complete traditional pattern.";}else if(ab||bd){rPts=24;rNote=`One rhyme pair landing — enough for ABCB, a perfectly traditional ballad scheme.`;}else{rPts=10;rNote="No clean end-rhymes locked in yet. Near-rhyme and slant rhyme both count.";}}
+    else{rPts=Math.min(14,lines.length*3);rNote="Need at least four lines to assess rhyme scheme.";}
+    let fPts=0,fNote='';
+    if(lines.length>=4){fPts=30;fNote="Four lines — the complete quatrain.";}
+    else{fPts=Math.max(5,lines.length*7);fNote=`${lines.length} of 4 lines written.`;}
+    return{total:nPts+rPts+fPts,criteria:[{name:"Narrative Motion",pts:nPts,max:30,note:nNote},{name:"Rhyme Scheme",pts:rPts,max:35,note:rNote},{name:"Form Completeness",pts:fPts,max:35,note:fNote}]};
+  }
+
+  function rankFor(t){ if(t>=90)return{name:"Laureate",sub:"Exceptional command of the form."}; if(t>=70)return{name:"Master",sub:"Strong, deliberate craft."}; if(t>=40)return{name:"Journeyman",sub:"Solid bones — a real draft."}; return{name:"Apprentice",sub:"Everyone's first drafts live here. Keep going."}; }
+
+  function renderChallengeResult(result){
+    const rank = rankFor(result.total);
+    const crit = result.criteria.map(c=>`
+      <div class="criterion-row">
+        <div class="criterion-head"><span class="criterion-name">${c.name}</span><span class="criterion-pts">${c.pts}/${c.max}</span></div>
+        <div class="criterion-bar-track"><div class="criterion-bar-fill" style="width:${Math.round(c.pts/c.max*100)}%"></div></div>
+        <div class="criterion-note">${c.note}</div>
+      </div>
+    `).join('');
+    document.getElementById('challengeResult').innerHTML = `
+      <div class="score-banner">
+        <div class="score-total-wrap"><span class="score-total">${result.total}</span><span class="score-max">/100</span></div>
+        <div><div class="score-rank">${rank.name}</div><div class="score-rank-sub">${rank.sub}</div></div>
+      </div>
+      <div class="score-criteria">${crit}</div>
+      <div class="score-closing">Scores are a read of craft elements, not a verdict on the poem. A 40 that surprises you is worth more than a 90 that doesn't.</div>
+    `;
+  }
+
+  /* ---- WRITER'S CIRCLE ---- */
+  let circleMode = 'create';
+  let circleState = null;
+  let circlePollInterval = null;
+  let circleDelegateCount = 4;
+
+  document.querySelectorAll('#circleModeToggle .mode-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      circleMode = tab.dataset.mode;
+      document.querySelectorAll('#circleModeToggle .mode-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const titleField = document.getElementById('circleTitleField');
+      const countField = document.getElementById('circleCountField');
+      const label = document.getElementById('circleCodeLabel');
+      const btn = document.getElementById('circleCreateBtn');
+      if(circleMode==='join'){
+        titleField.style.display='none'; countField.style.display='none';
+        label.textContent='Room code to join'; btn.textContent='Join the Circle';
+      } else {
+        titleField.style.display=''; countField.style.display='';
+        label.textContent='Room name / code'; btn.textContent='Open the Circle';
+      }
+    });
+  });
+
+  document.querySelectorAll('#circleDelegateCount .count-chip').forEach(chip=>{
+    chip.addEventListener('click',()=>{
+      document.querySelectorAll('#circleDelegateCount .count-chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active'); circleDelegateCount=parseInt(chip.dataset.count);
+    });
+  });
+
+  const roles=['Lead Writer','Delegate 1','Delegate 2','Delegate 3','Delegate 4'];
+  const roleColors=['author-lead','author-d1','author-d2','author-d3','author-d4'];
+
+  document.getElementById('circleCreateBtn').addEventListener('click', async ()=>{
+    const code = document.getElementById('circleRoomCode').value.trim().toUpperCase().replace(/\s+/g,'-');
+    const err = document.getElementById('circleSetupError');
+    err.textContent='';
+    if(!code){err.textContent='Enter a room code to continue.';return;}
+    if(circleMode==='create'){
+      const title = document.getElementById('circleStoryTitle').value.trim() || 'Untitled Story';
+      const totalRoles = circleDelegateCount+1;
+      circleState={ code, title, roles:roles.slice(0,totalRoles), sentences:[], myRole:0, live:false };
+      await trySaveRoom(circleState);
+      enterCircleRoom(circleState);
+    } else {
+      const data = await tryLoadRoom(code);
+      if(!data){ err.textContent=`No room found for code "${code}". Double-check the code and try again.`; return; }
+      circleState = data;
+      document.getElementById('circleJoinRoomLabel').textContent = code;
+      document.getElementById('circleJoinStoryLabel').textContent = data.title;
+      const list = document.getElementById('circleJoinRoleList');
+      list.innerHTML = circleState.roles.map((r,i)=>`
+        <button class="join-role-btn" onclick="pickJoinRole(${i})">
+          <span class="join-role-tag" style="background:rgba(107,63,160,0.1);color:var(--gold)">${r}</span>
+        </button>
+      `).join('');
+      showCircleView('circleJoinRole');
+    }
+  });
+
+  window.pickJoinRole=function(idx){ circleState.myRole=idx; enterCircleRoom(circleState); };
+  document.getElementById('circleJoinBackBtn').addEventListener('click',()=>showCircleView('circleSetup'));
+
+  function showCircleView(id){
+    document.querySelectorAll('.circle-view').forEach(v=>v.hidden=true);
+    document.getElementById(id).hidden=false;
+  }
+
+  function enterCircleRoom(state){
+    showCircleView('circleRoom');
+    document.getElementById('circleRoomCodeDisplay').textContent=state.code;
+    document.getElementById('circleInviteCode').textContent=state.code;
+    document.getElementById('circleStoryTitleDisplay').textContent=state.title;
+    const sel=document.getElementById('circleRoleSelect');
+    sel.innerHTML=state.roles.map((r,i)=>`<option value="${i}" ${i===state.myRole?'selected':''}>${r}</option>`).join('');
+    sel.addEventListener('change',()=>{circleState.myRole=parseInt(sel.value);updateTurnHint();});
+    updateCirclePage(); updateTurnHint();
+    if(circlePollInterval) clearInterval(circlePollInterval);
+    if(state.live) circlePollInterval=setInterval(pollCircle,4000);
+  }
+
+  function updateCirclePage(){
+    const page=document.getElementById('circlePage');
+    const empty=document.getElementById('circlePageEmpty');
+    const s=circleState;
+    if(!s||!s.sentences||s.sentences.length===0){ empty.style.display='block'; page.innerHTML=''; page.appendChild(empty); }
+    else{
+      empty.style.display='none';
+      page.innerHTML=s.sentences.map(sent=>`
+        <span class="circle-sentence">
+          <span class="sent-author ${roleColors[sent.role]}">${s.roles[sent.role]}:</span>
+          ${sent.text}${sent.text.match(/[.!?]$/)?'':'.'}
+        </span> `).join('');
+    }
+    const wc=(s&&s.sentences)?s.sentences.reduce((a,sent)=>a+(sent.text.match(/\S+/g)||[]).length,0):0;
+    const sc=(s&&s.sentences)?s.sentences.length:0;
+    document.getElementById('circleSentenceCount').textContent=`${sc} sentence${sc===1?'':'s'}`;
+    document.getElementById('circleWordCount').textContent=`${wc} words`;
+    document.getElementById('circlePagePct').textContent=Math.round(wc/250*100);
+  }
+
+  function updateTurnHint(){
+    const hint=document.getElementById('circleTurnHint');
+    if(!circleState) return;
+    const sc=circleState.sentences.length;
+    const expectedRole=sc%circleState.roles.length;
+    if(expectedRole===circleState.myRole){hint.textContent='It\'s your turn — add the next sentence.';}
+    else{hint.textContent=`${circleState.roles[expectedRole]}'s turn is next.`;}
+  }
+
+  document.getElementById('circleAddBtn').addEventListener('click',async()=>{
+    const input=document.getElementById('circleSentenceInput');
+    const err=document.getElementById('circleRoomError');
+    const val=input.value.trim(); err.textContent='';
+    if(!val) return;
+    circleState.sentences.push({role:circleState.myRole,text:val});
+    input.value='';
+    updateCirclePage(); updateTurnHint();
+    await trySaveRoom(circleState);
+  });
+
+  document.getElementById('circleUndoBtn').addEventListener('click',async()=>{
+    if(!circleState||!circleState.sentences.length) return;
+    circleState.sentences.pop();
+    updateCirclePage(); updateTurnHint();
+    await trySaveRoom(circleState);
+  });
+
+  document.getElementById('circleCopyBtn').addEventListener('click',()=>{
+    navigator.clipboard.writeText(`Join my Writer's Circle with code: ${circleState.code}`).then(()=>{
+      document.getElementById('circleCopyBtn').textContent='Copied!';
+      setTimeout(()=>document.getElementById('circleCopyBtn').textContent='Copy invite',2000);
+    });
+  });
+
+  document.getElementById('circleLeaveBtn').addEventListener('click',()=>{
+    if(circlePollInterval) clearInterval(circlePollInterval);
+    circleState=null; showCircleView('circleSetup');
+  });
+
+  async function trySaveRoom(state){
+    try{
+      const key='circle:'+state.code;
+      await window.storage.set(key,JSON.stringify(state),true);
+      document.getElementById('circleStatusDot').className='circle-status-dot live';
+      state.live=true;
+    } catch(e){
+      document.getElementById('circleStatusDot').className='circle-status-dot offline';
+      state.live=false;
+    }
+  }
+
+  async function tryLoadRoom(code){
+    try{
+      const r=await window.storage.get('circle:'+code,true);
+      if(r&&r.value) return JSON.parse(r.value);
+    } catch(e){}
+    return null;
+  }
+
+  async function pollCircle(){
+    if(!circleState) return;
+    const data=await tryLoadRoom(circleState.code);
+    if(data&&JSON.stringify(data.sentences)!==JSON.stringify(circleState.sentences)){
+      circleState.sentences=data.sentences;
+      updateCirclePage(); updateTurnHint();
+    }
+  }
+</script>
+</body>
+</html>
